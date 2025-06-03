@@ -1,0 +1,84 @@
+graph TB
+    subgraph "Frontend Layer"
+        UI[React dApp Interface]
+        WC[Wallet Connector]
+        VS[Validation Service]
+        NS[NFT Display Service]
+    end
+    
+    subgraph "Blockchain Layer"
+        BC[Blockchain Network]
+        UNQ[Contrato UNQ NFTs]
+        TP[Contrato NFT TP]
+        TPF[Contrato NFT TP FINAL]
+    end
+    
+    subgraph "API Layer"
+        AL[Alchemy API]
+        IPFS[IPFS Storage]
+    end
+    
+    subgraph "Smart Contract Functions"
+        subgraph "NFT TP Contract"
+            MTP[mintTPNFT]
+            VTP[validateRequirements]
+            GTP[getTPMetadata]
+        end
+        
+        subgraph "NFT TP FINAL Contract"
+            MTF[mintTPFinalNFT]
+            VTF[validateTPOwnership]
+            GTF[getTPFinalMetadata]
+        end
+    end
+    
+    subgraph "Validation Logic"
+        V1[Check 10 NFTs UNQ]
+        V2[Check No Retransfer]
+        V3[Check Mint Date < 28/05]
+        V4[Check Authorized Wallet]
+    end
+    
+    %% Connections
+    UI --> WC
+    UI --> VS
+    UI --> NS
+    
+    WC --> BC
+    VS --> AL
+    VS --> V1
+    VS --> V2
+    VS --> V3
+    VS --> V4
+    
+    V1 --> AL
+    V2 --> AL
+    V3 --> AL
+    
+    BC --> UNQ
+    BC --> TP
+    BC --> TPF
+    
+    TP --> MTP
+    TP --> VTP
+    TP --> GTP
+    
+    TPF --> MTF
+    TPF --> VTF
+    TPF --> GTF
+    
+    AL --> BC
+    NS --> IPFS
+    
+    %% Styling
+    classDef frontend fill:,stroke:#01579b,stroke-width:2px
+    classDef blockchain fill:#,stroke:#4a148c,stroke-width:2px
+    classDef api fill:#,stroke:#1b5e20,stroke-width:2px
+    classDef validation fill:#,stroke:#e65100,stroke-width:2px
+    classDef contract fill:#,stroke:#880e4f,stroke-width:2px
+    
+    class UI,WC,VS,NS frontend
+    class BC,UNQ,TP,TPF blockchain
+    class AL,IPFS api
+    class V1,V2,V3,V4 validation
+    class MTP,VTP,GTP,MTF,VTF,GTF contract

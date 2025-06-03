@@ -1,0 +1,247 @@
+.ethereum-nft-card {
+    position: relative;
+    width: 400px;
+    max-width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin: 1rem auto;
+    /* AGREGAR ALTURA MÁXIMA */
+    max-height: 600px;
+    /* Limitar altura total */
+}
+
+.ethereum-nft-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.ethereum-nft-card:hover .card-glow {
+    opacity: 1;
+}
+
+.card-glow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #627eea, #764ba2, #f093fb, #f5576c);
+    border-radius: 22px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.card-content {
+    position: relative;
+    background: rgba(25, 25, 35, 0.95);
+    border-radius: 20px;
+    height: 100%;
+    color: white;
+    /* AGREGAR FLEXBOX PARA CONTROLAR LAYOUT */
+    display: flex;
+    flex-direction: column;
+}
+
+.image-container {
+    position: relative;
+    height: 160px;
+    /* REDUCIR de 200px a 160px */
+    overflow: hidden;
+    border-radius: 20px 20px 0 0;
+    flex-shrink: 0;
+    /* No se encoge */
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ethereum-nft-card:hover .image-container img {
+    transform: scale(1.05);
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eth-icon {
+    font-size: 2.5rem;
+    /* REDUCIR de 3rem a 2.5rem */
+    color: white;
+    opacity: 0.7;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 0.75rem;
+    /* REDUCIR padding */
+}
+
+.token-id {
+    background: rgba(102, 126, 234, 0.9);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    /* REDUCIR tamaño */
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+}
+
+.card-body {
+    padding: 1rem;
+    /* REDUCIR de 1.5rem a 1rem */
+    flex-grow: 1;
+    /* Ocupa el espacio disponible */
+    display: flex;
+    flex-direction: column;
+}
+
+.nft-title {
+    font-size: 1.1rem;
+    /* REDUCIR de 1.3rem a 1.1rem */
+    font-weight: bold;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(45deg, #667eea, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* AGREGAR CONTROL DE OVERFLOW */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nft-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    /* REDUCIR de 0.9rem a 0.8rem */
+    line-height: 1.4;
+    margin: 0 0 1rem 0;
+    /* REDUCIR margen */
+    /* AGREGAR CONTROL DE OVERFLOW */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    /* Máximo 3 líneas */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.metadata-grid {
+    display: grid;
+    gap: 0.5rem;
+    /* REDUCIR de 0.75rem a 0.5rem */
+    margin-bottom: 1rem;
+    /* REDUCIR margen */
+    flex-grow: 1;
+}
+
+.metadata-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 0.5rem;
+}
+
+.label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: fit-content;
+    /* Se ajusta al contenido */
+    flex-shrink: 0;
+}
+
+.value {
+    color: white;
+    font-weight: 500;
+    font-size: 0.8rem;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.3;
+    flex: 1;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    /* REDUCIR padding */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+    /* Se pega al fondo */
+}
+
+.eth-price {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #667eea;
+    font-weight: bold;
+    font-size: 0.8rem;
+    /* AGREGAR tamaño específico */
+}
+
+.eth-symbol {
+    font-size: 1rem;
+    /* REDUCIR de 1.2rem a 1rem */
+}
+
+.view-btn {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    /* REDUCIR padding */
+    border-radius: 8px;
+    /* REDUCIR border-radius */
+    font-size: 0.7rem;
+    /* REDUCIR tamaño */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}

@@ -1,0 +1,27 @@
+.container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.nft-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.nft-card {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  max-width: 300px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  text-align: left;
+}
+
+.nft-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}

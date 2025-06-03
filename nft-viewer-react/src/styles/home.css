@@ -1,0 +1,285 @@
+/* Contenedor principal con fondo completo */
+.viewer-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+    /* Solo padding vertical */
+}
+
+/* Contenedor interno para el contenido centrado */
+.content-wrapper {
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    /* Padding horizontal aquí */
+}
+
+.connect-btn {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.connect-btn:hover {
+    background-color: #005bb5;
+}
+
+.wallet {
+    font-weight: bold;
+    margin: 1rem 0;
+    color: #fff;
+}
+
+.error {
+    color: #ff4444;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
+h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.validation-badges {
+    padding: 16px 0;
+}
+
+.badges-container {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.validation-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    cursor: default;
+}
+
+.validation-badge.success {
+    background: #dcfce7;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.validation-badge.error {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.badge-icon {
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.badge-text {
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.validation-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 🎯 Mejoras en elementos existentes */
+.main-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    margin-bottom: 1rem;
+}
+
+.wallet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 1rem 0;
+}
+
+.wallet-label {
+    font-size: 1.2rem;
+    color: white;
+    font-weight: 500;
+}
+
+.wallet-address {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
+    word-break: break-all;
+    max-width: 100%;
+}
+
+/* 🎯 Estados mejorados */
+.loading-text {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.error {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    margin: 1rem 0;
+}
+
+/* 🎯 Accesibilidad */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.mint-info-container {
+    margin-top: 1.5rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.mint-info-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.mint-info-text:hover,
+.mint-info-text:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    outline: none;
+}
+
+.mint-tp-btn {
+    margin-top: 1rem;
+    background-color: #34d399;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mint-tp-btn:hover {
+    background-color: #059669;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* 📱 Responsive optimizado */
+@media (max-width: 640px) {
+    .badges-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .validation-badge {
+        justify-content: center;
+        min-width: 140px;
+    }
+
+    .wallet-address {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .view-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .validation-status {
+        margin: 0.5rem;
+    }
+}
+
+/* 🎯 Mejor contraste y focus states */
+.view-btn:focus,
+.mint-tp-btn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.validation-badge:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* 🎯 Dark mode ready (opcional) */
+@media (prefers-color-scheme: dark) {
+    .validation-badge.success {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .validation-badge.error {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .wallet-address {
+        background: rgba(255, 255, 255, 0.1);
+        color: #e5e7eb;
+    }
+}

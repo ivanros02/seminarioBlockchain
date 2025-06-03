@@ -1,0 +1,56 @@
+graph TD
+    A[Inicio - Usuario conecta wallet] --> B{Wallet conectada?}
+    B -->|No| A
+    B -->|Sí| C[Obtener NFTs de la wallet via Alchemy API]
+    
+    C --> D{Tiene exactamente 10 NFTs UNQ?}
+    D -->|No| E[Mostrar error: Faltan NFTs UNQ]
+    D -->|Sí| F[Verificar eventos de transferencia]
+    
+    F --> G{Algún NFT fue retransferido?}
+    G -->|Sí| H[Mostrar error: NFTs retransferidos]
+    G -->|No| I[Verificar fecha de mint de cada NFT]
+    
+    I --> J{Todos mintados antes del 28/05?}
+    J -->|No| K[Mostrar error: NFTs mintados muy tarde]
+    J -->|Sí| L{Wallet autorizada para mint? Pablo/Daniel}
+    
+    L -->|No| M[Mostrar: Validaciones OK pero wallet no autorizada]
+    L -->|Sí| N[Mostrar botón 'Mint NFT TP']
+    
+    N --> O[Usuario hace clic en 'Mint NFT TP']
+    O --> P[Smart Contract valida requisitos]
+    P --> Q[Acuñar NFT TP con metadatos embedded]
+    Q --> R[Emitir evento de mint exitoso]
+    
+    %% Flujo para profesores
+    R --> S[PASO 2: Wallet de profesor conecta]
+    S --> T[Mostrar NFT TP otorgado + NFT UNQ 91D]
+    T --> U[Mostrar datos embedded de 10 NFTs originales]
+    
+    U --> V{Wallet tiene NFT TP?}
+    V -->|No| W[Solo mostrar información]
+    V -->|Sí| X[Mostrar botón 'Promocionar']
+    
+    X --> Y[Profesor ingresa nombre y texto]
+    Y --> Z[Hacer clic en 'Promocionar']
+    Z --> AA[Smart Contract minta NFT TP FINAL]
+    AA --> BB[Completado - NFT TP FINAL acuñado]
+    
+    %% Estados de error
+    E --> CC[Fin - Requisitos no cumplidos]
+    H --> CC
+    K --> CC
+    M --> CC
+    W --> DD[Fin - Solo visualización]
+    
+    %% Estilos
+    classDef errorNode fill:,stroke:#ff0000,stroke-width:2px
+    classDef successNode fill:,stroke:#00ff00,stroke-width:2px
+    classDef processNode fill:,stroke:#0066cc,stroke-width:2px
+    classDef decisionNode fill:fffcc,stroke:#ffcc00,stroke-width:2px
+    
+    class E,H,K,CC errorNode
+    class R,BB,DD successNode
+    class C,F,I,O,P,Q,S,T,U,Y,Z,AA processNode
+    class B,D,G,J,L,V decisionNode

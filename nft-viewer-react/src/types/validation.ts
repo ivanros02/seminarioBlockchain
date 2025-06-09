@@ -1,3 +1,5 @@
+import type { MintResult } from '../services/mintTPService';
+
 export interface NFTValidationDetail {
     tokenId: number;
     noRetransfer: boolean;
@@ -17,4 +19,20 @@ export interface ValidationResult {
     invalidNFTs: string[];
     errors: string[];
     nftDetails?: NFTValidationDetail[];
+}
+
+export interface ValidationBadgeProps {
+  isValid: boolean;
+  text: string;
+  ariaLabel: string;
+}
+
+// ✅ Props actualizados con mint states
+export interface ValidationPanelProps {
+  validationResult: ValidationResult | null;
+  nftsCount: number;
+  onMintTP: () => void;
+  isMinting?: boolean;
+  mintResult?: MintResult | null;
+  mintError?: string | null;
 }

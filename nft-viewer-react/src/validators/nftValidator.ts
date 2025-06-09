@@ -2,70 +2,12 @@ import { AlchemyService } from "../services/alchemyService";
 import type { NFTValidationDetail, ValidationResult } from "../types/validation";
 
 export class NFTValidator {
-  static async validateSingleNFT(address: string, tokenId: number): Promise<NFTValidationDetail> {
-    const detail: NFTValidationDetail = {
-      tokenId,
-      noRetransfer: true,
-      validMintDate: true,
-      transferCount: 0,
-      mintCount: 0,
-      errors: []
-    };
+  // ✅ Fecha límite: 28/05/2025 (CORREGIDA)
+  private static readonly CUTOFF_DATE = new Date("2025-05-28T23:59:59Z");
 
-    try {
-      console.log(`🔍 Validando Token ${tokenId}...`);
-
-      try {
-        detail.errors.push(`✅ NFT existe en contrato`);
-        detail.noRetransfer = true;
-        detail.mintCount = 1;
-      } catch (nftError) {
-        detail.errors.push(`❌ Error verificando existencia del NFT: ${nftError}`);
-        detail.noRetransfer = false;
-        return detail;
-      }
-
-      // Verificar propietario actual
-      try {
-        const currentOwners = await AlchemyService.getOwnersForToken(tokenId);
-        const isCurrentOwner = currentOwners.some((owner: string) =>
-          owner.toLowerCase() === address.toLowerCase()
-        );
-
-        if (isCurrentOwner) {
-          detail.errors.push(`✅ Usuario es propietario actual`);
-          detail.noRetransfer = true;
-        } else {
-          detail.errors.push(`❌ Usuario no es propietario actual`);
-          detail.noRetransfer = false;
-        }
-      } catch (ownerError) {
-        detail.errors.push(`⚠️ No se pudo verificar propietario: ${ownerError}`);
-      }
-
-      // Verificar fecha usando block explorer (simplificado)
-      try {
-        const cutoffDate = new Date("2024-05-28T23:59:59Z");
-        detail.validMintDate = true;
-        detail.mintDate = "2024-05-01T00:00:00Z";
-        detail.errors.push(`✅ Fecha de mint asumida válida (antes del ${cutoffDate.toLocaleDateString()})`);
-      } catch (dateError) {
-        detail.errors.push(`⚠️ Error verificando fecha: ${dateError}`);
-        detail.validMintDate = true;
-      }
-
-      console.log(`✅ Token ${tokenId}: transfers=${detail.noRetransfer}, date=${detail.validMintDate}`);
-      return detail;
-
-    } catch (error) {
-      console.error(`❌ Error validando token ${tokenId}:`, error);
-      detail.errors.push(`Error general: ${error}`);
-      detail.noRetransfer = false;
-      detail.validMintDate = false;
-      return detail;
-    }
-  }
-
+  /**
+   * ✅ VALIDACIÓN PRINCIPAL - Los 3 requisitos esenciales
+   */
   static async validateNFTsStrict(address: string): Promise<ValidationResult> {
     const result: ValidationResult = {
       isValid: false,
@@ -78,131 +20,149 @@ export class NFTValidator {
     };
 
     try {
-      console.log(`🚀 Iniciando validación estricta para ${address}`);
+      console.log(`🚀 Validando wallet ${address}`);
 
+      // ✅ REQUISITO 1: Verificar exactamente 10 NFTs UNQ
       const nfts = await AlchemyService.getNFTsByOwner(address);
+      console.log(`📦 Encontrados ${nfts.length} NFTs del contrato UNQ`);
 
       result.hasExactly10NFTs = nfts.length === 10;
       if (!result.hasExactly10NFTs) {
-        result.errors.push(`Se requieren exactamente 10 NFTs UNQ. Encontrados: ${nfts.length}`);
+        result.errors.push(`❌ Se requieren exactamente 10 NFTs UNQ. Encontrados: ${nfts.length}`);
+        return result;
       }
 
-      // Validar cada NFT individualmente
+      console.log(`✅ REQUISITO 1: Tiene exactamente 10 NFTs ✓`);
+
+      // ✅ REQUISITOS 2 y 3: Validar cada NFT individualmente
       const validationPromises = nfts.map(async (nft: any) => {
         const tokenId = parseInt(nft.id.tokenId, 16);
-        return await this.validateSingleNFT(address, tokenId);
+        return await this.validateSingleNFT(tokenId, address);
       });
 
       const validationDetails = await Promise.all(validationPromises);
       result.nftDetails = validationDetails;
 
-      // Contar válidos
+      // Contar NFTs válidos
       const validTransfers = validationDetails.filter(d => d.noRetransfer);
       const validDates = validationDetails.filter(d => d.validMintDate);
 
       result.allNFTsValid = validTransfers.length === nfts.length;
       result.validMintDates = validDates.length === nfts.length;
 
-      // Generar errores específicos
+      console.log(`📊 REQUISITO 2: ${validTransfers.length}/${nfts.length} NFTs sin retransferir`);
+      console.log(`📊 REQUISITO 3: ${validDates.length}/${nfts.length} NFTs con fecha válida`);
+
+      // Reportar NFTs inválidos
       validationDetails.forEach(detail => {
         if (!detail.noRetransfer) {
-          result.invalidNFTs.push(`Token ${detail.tokenId}: Ha sido retransferido`);
+          result.invalidNFTs.push(`Token ${detail.tokenId}: Retransferido`);
         }
         if (!detail.validMintDate) {
-          result.invalidNFTs.push(`Token ${detail.tokenId}: Fecha de mint inválida`);
+          result.invalidNFTs.push(`Token ${detail.tokenId}: Fecha de mint inválida (después del 28/05/2025)`);
         }
       });
 
+      // ✅ RESULTADO FINAL
       result.isValid = result.hasExactly10NFTs && result.allNFTsValid && result.validMintDates;
 
-      console.log(`📊 Validación estricta completada: ${result.isValid ? 'VÁLIDA' : 'INVÁLIDA'}`);
+      console.log(`🎯 VALIDACIÓN FINAL: ${result.isValid ? '✅ VÁLIDA' : '❌ INVÁLIDA'}`);
+      console.log(`   - 10 NFTs: ${result.hasExactly10NFTs ? '✅' : '❌'}`);
+      console.log(`   - Sin retransferir: ${result.allNFTsValid ? '✅' : '❌'}`);
+      console.log(`   - Fechas válidas: ${result.validMintDates ? '✅' : '❌'}`);
+
       return result;
 
     } catch (error) {
-      console.error("❌ Error en validación estricta:", error);
+      console.error("❌ Error en validación:", error);
       result.errors.push(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
       return result;
     }
   }
 
-  static async validateNFTs(address: string): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      isValid: false,
-      hasExactly10NFTs: false,
-      allNFTsValid: true,
-      validMintDates: true,
-      invalidNFTs: [],
-      errors: [],
-      nftDetails: []
-    };
-
-    try {
-      console.log(`🚀 Iniciando validación permisiva para ${address}`);
-
-      const nfts = await AlchemyService.getNFTsByOwner(address);
-
-      console.log(`📦 Encontrados ${nfts.length} NFTs del contrato UNQ`);
-
-      result.hasExactly10NFTs = nfts.length === 10;
-      if (!result.hasExactly10NFTs) {
-        result.errors.push(`Se requieren exactamente 10 NFTs UNQ. Encontrados: ${nfts.length}`);
-      }
-
-      if (result.hasExactly10NFTs) {
-        result.allNFTsValid = true;
-        result.validMintDates = true;
-
-        result.nftDetails = nfts.map((nft: any) => {
-          const tokenId = parseInt(nft.id.tokenId, 16);
-          return {
-            tokenId,
-            noRetransfer: true,
-            validMintDate: true,
-            transferCount: 0,
-            mintCount: 1,
-            mintDate: "2024-05-01T00:00:00Z",
-            errors: [`✅ Validación permisiva: NFT válido`]
-          };
-        });
-      }
-
-      result.isValid = result.hasExactly10NFTs && result.allNFTsValid && result.validMintDates;
-
-      console.log(`📊 Validación permisiva: ${result.isValid ? 'VÁLIDA' : 'INVÁLIDA'}`);
-      return result;
-
-    } catch (error) {
-      console.error("❌ Error en validación permisiva:", error);
-      result.errors.push(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-      return result;
-    }
-  }
-
-  static async validateNFTsSimple(address: string): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      isValid: false,
-      hasExactly10NFTs: false,
-      allNFTsValid: true,
-      validMintDates: true,
-      invalidNFTs: [],
+  /**
+   * ✅ VALIDACIÓN DE UN SOLO NFT
+   */
+  private static async validateSingleNFT(tokenId: number, ownerAddress: string): Promise<NFTValidationDetail> {
+    const detail: NFTValidationDetail = {
+      tokenId,
+      noRetransfer: false,
+      validMintDate: false,
+      transferCount: 0,
+      mintCount: 0,
       errors: []
     };
 
     try {
-      const nfts = await AlchemyService.getNFTsByOwner(address);
+      console.log(`🔍 Validando Token ${tokenId}...`);
 
-      result.hasExactly10NFTs = nfts.length === 10;
-      if (!result.hasExactly10NFTs) {
-        result.errors.push(`Se requieren exactamente 10 NFTs UNQ. Encontrados: ${nfts.length}`);
+      // ✅ REQUISITO 2 y 3: Analizar transferencias y fechas (LÓGICA ORIGINAL)
+      const transferAnalysis = await AlchemyService.analyzeTokenTransfers(tokenId.toString());
+      
+      console.log(`🐛 DEBUG Token ${tokenId}:`, {
+        mintTransferExists: !!transferAnalysis.mintTransfer,
+        mintTimestampRaw: transferAnalysis.mintTimestamp,
+        mintTimestampType: typeof transferAnalysis.mintTimestamp,
+        mintTimestampDate: transferAnalysis.mintTimestamp 
+          ? new Date(transferAnalysis.mintTimestamp * 1000).toISOString()
+          : 'null'
+      });
+
+      detail.mintCount = transferAnalysis.mintTransfer ? 1 : 0;
+      detail.transferCount = transferAnalysis.nonMintTransfers.length;
+
+      // ✅ VALIDACIÓN 2: No Retransferencia
+      const hasValidMint = detail.mintCount === 1;
+      
+      if (!hasValidMint) {
+        detail.errors.push(`❌ No tiene evento de mint válido`);
+        detail.noRetransfer = false;
+      } else {
+        // Verificar si el usuario actual transfirió el NFT
+        const userTransfersOut = transferAnalysis.nonMintTransfers.filter((transfer: any) => {
+          return transfer.from?.toLowerCase() === ownerAddress.toLowerCase();
+        });
+
+        detail.noRetransfer = userTransfersOut.length === 0;
+
+        if (detail.noRetransfer) {
+          detail.errors.push(`✅ NFT válido: usuario no lo transfirió`);
+        } else {
+          detail.errors.push(`❌ Usuario transfirió este NFT ${userTransfersOut.length} vez(es)`);
+        }
       }
 
-      result.isValid = result.hasExactly10NFTs;
-      return result;
+      // ✅ VALIDACIÓN 3: Fecha de Emisión (LÓGICA ORIGINAL)
+      if (transferAnalysis.mintTransfer && transferAnalysis.mintTimestamp) {
+        const mintDate = new Date(transferAnalysis.mintTimestamp * 1000);
+        detail.mintDate = mintDate.toISOString();
+        detail.validMintDate = mintDate < this.CUTOFF_DATE;
+
+        console.log(`🕐 Token ${tokenId} - Mint: ${mintDate.toLocaleDateString()} ${mintDate.toLocaleTimeString()}, Válido: ${detail.validMintDate}`);
+
+        detail.errors.push(
+          detail.validMintDate 
+            ? `✅ Mint: ${mintDate.toLocaleDateString()} (antes del 28/05/2025)` 
+            : `❌ Mint: ${mintDate.toLocaleDateString()} (después del 28/05/2025)`
+        );
+      } else {
+        console.log(`❌ Token ${tokenId} - No se pudo obtener timestamp de mint`);
+        detail.errors.push(`❌ No se pudo verificar fecha de mint`);
+        detail.validMintDate = false;
+      }
+
+      console.log(`🎯 Token ${tokenId} RESULTADO:`);
+      console.log(`   - No retransferido: ${detail.noRetransfer ? '✅' : '❌'}`);
+      console.log(`   - Fecha válida: ${detail.validMintDate ? '✅' : '❌'}`);
+
+      return detail;
 
     } catch (error) {
-      console.error("Error en validación simple:", error);
-      result.errors.push(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-      return result;
+      console.error(`❌ Error validando token ${tokenId}:`, error);
+      detail.errors.push(`❌ Error: ${error}`);
+      detail.noRetransfer = false;
+      detail.validMintDate = false;
+      return detail;
     }
   }
 }

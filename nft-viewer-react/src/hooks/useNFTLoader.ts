@@ -10,7 +10,7 @@ export const useNFTLoader = () => {
   const [error, setError] = useState<string>('');
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
-  // Función para cargar solo NFTs
+  // ✅ Función para cargar solo NFTs
   const loadNFTs = useCallback(async (address: string) => {
     setLoading(true);
     setError('');
@@ -28,68 +28,61 @@ export const useNFTLoader = () => {
     }
   }, []);
 
-  // Función para validar con diferentes modos
-  const validateNFTs = useCallback(async (
-    address: string, 
-    mode: 'strict' | 'permissive' | 'simple' = 'permissive'
-  ) => {
+  // ✅ Función para validar (solo strict - las 3 validaciones)
+  const validateNFTs = useCallback(async (address: string) => {
     setLoading(true);
     setError('');
     
     try {
-      let validation: ValidationResult;
+      console.log(`🔍 Iniciando validación strict para ${address}`);
       
-      switch (mode) {
-        case 'strict':
-          validation = await NFTValidator.validateNFTsStrict(address);
-          break;
-        case 'simple':
-          validation = await NFTValidator.validateNFTsSimple(address);
-          break;
-        default:
-          validation = await NFTValidator.validateNFTs(address);
-      }
+      // Solo usar validateNFTsStrict - las 3 validaciones esenciales
+      const validation = await NFTValidator.validateNFTsStrict(address);
       
       setValidationResult(validation);
+      
+      console.log(`🎯 Validación completada:`, {
+        isValid: validation.isValid,
+        hasExactly10NFTs: validation.hasExactly10NFTs,
+        allNFTsValid: validation.allNFTsValid,
+        validMintDates: validation.validMintDates,
+        invalidCount: validation.invalidNFTs.length
+      });
+      
       return validation;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error en validación';
       setError(errorMessage);
+      console.error('❌ Error en validación:', err);
       throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Función combinada (la más usada)
-  const loadAndValidateNFTs = useCallback(async (
-    address: string,
-    validationMode: 'strict' | 'permissive' | 'simple' = 'permissive'
-  ) => {
+  // ✅ Función combinada - cargar NFTs y validar
+  const loadAndValidateNFTs = useCallback(async (address: string) => {
     setLoading(true);
     setError('');
     setValidationResult(null);
 
     try {
-      // Cargar NFTs
+      console.log(`🚀 Cargando y validando NFTs para ${address}`);
+      
+      // Paso 1: Cargar NFTs
       const nftResults = await NFTLoader.loadNFTs(address);
       setNfts(nftResults);
+      console.log(`📦 Cargados ${nftResults.length} NFTs`);
 
-      // Realizar validación según el modo
-      let validation: ValidationResult;
-      
-      switch (validationMode) {
-        case 'strict':
-          validation = await NFTValidator.validateNFTsStrict(address);
-          break;
-        case 'simple':
-          validation = await NFTValidator.validateNFTsSimple(address);
-          break;
-        default:
-          validation = await NFTValidator.validateNFTs(address);
-      }
-      
+      // Paso 2: Validar (las 3 validaciones esenciales)
+      const validation = await NFTValidator.validateNFTsStrict(address);
       setValidationResult(validation);
+
+      console.log(`🎯 Proceso completado:`, {
+        nftsLoaded: nftResults.length,
+        validationPassed: validation.isValid,
+        errors: validation.errors.length
+      });
 
       return {
         nfts: nftResults,
@@ -97,56 +90,41 @@ export const useNFTLoader = () => {
       };
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      const errorMessage = err instanceof Error ? err.message : 'Error en proceso de validación';
       setError(errorMessage);
+      console.error('❌ Error en loadAndValidateNFTs:', err);
       throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Métodos específicos para cada tipo de validación
-  const validateStrict = useCallback(async (address: string) => {
-    return await validateNFTs(address, 'strict');
-  }, [validateNFTs]);
-
-  const validatePermissive = useCallback(async (address: string) => {
-    return await validateNFTs(address, 'permissive');
-  }, [validateNFTs]);
-
-  const validateSimple = useCallback(async (address: string) => {
-    return await validateNFTs(address, 'simple');
-  }, [validateNFTs]);
-
+  // ✅ Reset state
   const reset = useCallback(() => {
     setNfts([]);
     setError('');
     setValidationResult(null);
     setLoading(false);
+    console.log('🔄 Estado reseteado');
   }, []);
 
   return {
-    // Estado
+    // ✅ Estado
     nfts,
     loading,
     error,
     validationResult,
     
-    // Acciones principales
-    loadNFTs,
-    validateNFTs,
-    loadAndValidateNFTs,
+    // ✅ Acciones principales
+    loadNFTs,                // Solo cargar NFTs
+    validateNFTs,            // Solo validar (3 validaciones)
+    loadAndValidateNFTs,     // Cargar + Validar
     
-    // Acciones específicas
-    validateStrict,
-    validatePermissive,
-    validateSimple,
-    
-    // Utilidades
+    // ✅ Utilidades
     reset
   };
 };
 
-// Exportar también los tipos para mantener compatibilidad
+// ✅ Exportar tipos
 export type { ValidationResult } from '../types/validation';
 export type { NFTValidationDetail } from '../types/validation';

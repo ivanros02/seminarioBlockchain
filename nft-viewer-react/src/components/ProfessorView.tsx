@@ -17,9 +17,7 @@ export const ProfessorView = ({ walletAddress }: ProfessorViewProps) => {
         professorData,
         loading,
         error,
-        promoting,
         loadProfessorData,
-        promoteStudent
     } = useProfessor();
 
     // Cargar datos al montar o cambiar wallet

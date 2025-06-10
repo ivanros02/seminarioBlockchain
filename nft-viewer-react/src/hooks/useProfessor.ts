@@ -23,11 +23,11 @@ export const useProfessor = (): UseProfessorReturn => {
   const loadProfessorData = useCallback(async (walletAddress: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await ProfessorService.getProfessorData(walletAddress);
       setProfessorData(data);
-      
+
       if (data.isProfessor) {
         console.log(`👨‍🏫 Profesor ${data.professorName} conectado`);
         if (data.hasTPNFT) {
@@ -45,20 +45,25 @@ export const useProfessor = (): UseProfessorReturn => {
     }
   }, []);
 
-  const promoteStudent = useCallback(async (certificate: CertificateInfo) => {
+  const promoteStudent = useCallback(async (
+    certificate: CertificateInfo,
+    promotionText: string = `Promoción del estudiante ${certificate.studentName} por completar satisfactoriamente el curso.`
+  ) => {
     if (!professorData?.canPromote) {
       toast.error('No tienes permisos para promocionar');
       return;
     }
 
     setPromoting(true);
-    
+
     try {
       const success = await ProfessorService.promoteStudent(
-        professorData.walletAddress, 
-        certificate
+        professorData.walletAddress,  // professorWallet
+        certificate.studentWallet,    // studentWallet
+        certificate.studentName,      // studentName
+        promotionText                 // promotionText
       );
-      
+
       if (success) {
         toast.success(`🎉 ¡Estudiante ${certificate.studentName} promocionado exitosamente!`);
       } else {

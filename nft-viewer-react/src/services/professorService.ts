@@ -2,7 +2,7 @@
 import { ethers } from 'ethers';
 import { TP_CONTRACT_ADDRESS, TP_CONTRACT_ABI, type CertificateInfo } from '../constants/tpConstants';
 import { PromotionService, type PromotionRequest, type PromotionResult } from './promotionService';
-
+//0xa34Bb3b93C7DA0F87D65ed1FC67C4b402bEf9A35
 // ✅ Re-exportar CertificateInfo para que esté disponible
 export type { CertificateInfo } from '../constants/tpConstants';
 export type { PromotionResult } from './promotionService';
@@ -11,7 +11,7 @@ export type { PromotionResult } from './promotionService';
 export const PROFESSOR_WALLETS = {
     PABLO: "0x96664195a728321F0F672B3BA29639eD727CE7a1",
     DANIEL: "0x81Bce31CaB4F37DdC8561550Ee7eaa859ca50581",
-    TEST: "1"
+    TEST: "0xa34Bb3b93C7DA0F87D65ed1FC67C4b402bEf9A35"
 } as const;
 
 export interface ProfessorNFT {

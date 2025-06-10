@@ -1,7 +1,7 @@
 // components/PromotionSection.tsx
 import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { usePromotion } from '../hooks/usePromotion'; // ✅ Usar el hook
+import { usePromotion } from '../hooks/usePromotion'; // ✅ Usar usePromotion
 import { ProfessorService } from '../services/professorService';
 
 interface PromotionSectionProps {
@@ -19,9 +19,9 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 }) => {
   const [showPromotionForm, setShowPromotionForm] = useState(false);
   const [promotionText, setPromotionText] = useState('');
-  const [editableStudentName, setEditableStudentName] = useState(''); // ✅ NUEVO: nombre editable
+  const [editableStudentName, setEditableStudentName] = useState('');
 
-  // ✅ Usar el hook de promoción
+  // ✅ Usar usePromotion correctamente
   const {
     promoteStudent,
     isPromoting,
@@ -32,20 +32,20 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 
   const handleShowPromotionForm = useCallback(() => {
     setShowPromotionForm(true);
-    setPromotionText(''); // Reset del texto
-    setEditableStudentName(studentName); // ✅ NUEVO: Inicializar con el nombre del certificado
-    resetPromotionState(); // ✅ Reset usando el hook
+    setPromotionText('');
+    setEditableStudentName(studentName); // Inicializar con el nombre del certificado
+    resetPromotionState(); // Reset del estado de promoción
   }, [resetPromotionState, studentName]);
 
   const handleHidePromotionForm = useCallback(() => {
     setShowPromotionForm(false);
     setPromotionText('');
-    setEditableStudentName(''); // ✅ NUEVO: Reset del nombre
-    resetPromotionState(); // ✅ Reset usando el hook
+    setEditableStudentName('');
+    resetPromotionState();
   }, [resetPromotionState]);
 
   const handlePromoteStudent = useCallback(async () => {
-    if (!editableStudentName.trim()) { // ✅ NUEVO: Validar nombre editable
+    if (!editableStudentName.trim()) {
       toast.error("El nombre del estudiante es requerido");
       return;
     }
@@ -60,18 +60,20 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
       return;
     }
 
-    // ✅ Usar el hook para promocionar con el nombre editable
+    // ✅ Usar usePromotion con los 4 parámetros requeridos
     const result = await promoteStudent(
       professorWallet,
       studentWallet,
-      editableStudentName.trim(), // ✅ NUEVO: Usar nombre editable
+      editableStudentName.trim(),
       promotionText.trim()
     );
 
+    // Si fue exitoso, mantener el formulario abierto para mostrar el resultado
     if (result.success) {
-      setShowPromotionForm(false);
+      // No cerrar el formulario inmediatamente para mostrar el éxito
+      console.log('🎉 Promoción exitosa:', result);
     }
-  }, [professorWallet, studentWallet, editableStudentName, promotionText, promoteStudent]); // ✅ NUEVO: Agregar editableStudentName
+  }, [professorWallet, studentWallet, editableStudentName, promotionText, promoteStudent]);
 
   // Si hay resultado exitoso, mostrar detalles
   if (promotionResult?.success) {
@@ -84,16 +86,20 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 
         <div className="promotion-success-details">
           <div className="promotion-detail">
-            <strong>Estudiante:</strong> {editableStudentName || studentName} {/* ✅ CORREGIDO: Usar el estado local */}
+            <strong>Estudiante:</strong> {editableStudentName}
           </div>
           
           <div className="promotion-detail">
             <strong>Profesor:</strong> {ProfessorService.getProfessorName(professorWallet)}
           </div>
           
+          <div className="promotion-detail">
+            <strong>Wallet del Estudiante:</strong> {studentWallet.slice(0, 8)}...{studentWallet.slice(-6)}
+          </div>
+          
           {promotionResult.tokenId && (
             <div className="promotion-detail">
-              <strong>Token ID de Promoción:</strong> {promotionResult.tokenId}
+              <strong>Token ID de Promoción:</strong> #{promotionResult.tokenId}
             </div>
           )}
           
@@ -116,6 +122,11 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               🔗 Ver en Etherscan
             </a>
           )}
+
+          <div className="promotion-detail">
+            <strong>Texto de Promoción:</strong> 
+            <div className="promotion-text-display">"{promotionText}"</div>
+          </div>
         </div>
 
         <button
@@ -123,7 +134,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
           className="back-button"
           type="button"
         >
-          ← Volver
+          ← Crear Nueva Promoción
         </button>
       </div>
     );
@@ -159,7 +170,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
             <p><strong>Profesor:</strong> {ProfessorService.getProfessorName(professorWallet)}</p>
           </div>
 
-          {/* ✅ NUEVO: Campo para nombre del estudiante */}
+          {/* Campo para nombre del estudiante */}
           <div className="student-name-input">
             <label htmlFor="studentName" className="input-label">
               Nombre del Estudiante *
@@ -174,8 +185,12 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               className="student-name-field"
               disabled={isPromoting}
             />
+            <div className="input-hint">
+              Puedes modificar el nombre si es necesario
+            </div>
           </div>
 
+          {/* Campo para texto de promoción */}
           <div className="promotion-text-input">
             <label htmlFor="promotionText" className="input-label">
               Texto de Promoción *
@@ -184,7 +199,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               id="promotionText"
               value={promotionText}
               onChange={(e) => setPromotionText(e.target.value)}
-              placeholder="Escribe un mensaje de promoción para el estudiante (máx. 500 caracteres)"
+              placeholder="Escribe un mensaje de promoción personalizado para el estudiante. Ejemplo: 'Por su excelente desempeño en el curso de React y su dedicación excepcional...'"
               maxLength={500}
               rows={4}
               className="promotion-textarea"
@@ -205,10 +220,10 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               {isPromoting ? (
                 <>
                   <span className="loading-spinner">⏳</span>
-                  PROMOCIONANDO...
+                  CREANDO NFT DE PROMOCIÓN...
                 </>
               ) : (
-                <>🎓 PROMOCIONAR ESTUDIANTE</>
+                <>🎓 CREAR NFT DE PROMOCIÓN</>
               )}
             </button>
 
@@ -218,17 +233,30 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               className="cancel-button"
               type="button"
             >
-              Cancelar
+              ❌ Cancelar
             </button>
           </div>
 
-          {/* Error si existe */}
-          {promotionResult?.error && (
+          {/* Mostrar error si existe */}
+          {(promotionResult?.error || promotionError) && (
             <div className="promotion-error">
               <span className="error-icon">❌</span>
-              <span className="error-text">{promotionResult.error}</span>
+              <span className="error-text">
+                {promotionResult?.error || promotionError}
+              </span>
             </div>
           )}
+
+          {/* Información adicional */}
+          <div className="promotion-info">
+            <h4>ℹ️ Información sobre el NFT de Promoción:</h4>
+            <ul>
+              <li>Se creará un NFT único para el estudiante</li>
+              <li>El NFT contendrá el nombre y texto personalizado</li>
+              <li>Solo profesores con NFTs TP pueden crear promociones</li>
+              <li>La transacción será registrada en la blockchain</li>
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -243,7 +271,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
       </div>
       
       <p className="available-message">
-        Como profesor con NFTs TP, puedes promocionar a este estudiante.
+        Como profesor con NFTs TP, puedes crear un NFT de promoción personalizado para este estudiante.
       </p>
 
       <button
@@ -251,7 +279,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
         className="show-promotion-button"
         type="button"
       >
-        🎯 PROMOCIONAR ESTUDIANTE
+        🎯 CREAR NFT DE PROMOCIÓN
       </button>
     </div>
   );

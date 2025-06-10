@@ -65,7 +65,7 @@ export default function NFTViewer() {
     <div className="viewer-container">
       <div className="content-wrapper">
         <main className="text-center mb-4" role="main">
-          {/* 🎯 Header */}
+          {/* Header */}
           <header className="mb-3">
             <h1 className="main-title">🎓 Visualizador de NFTs UNQ</h1>
             
@@ -93,7 +93,7 @@ export default function NFTViewer() {
                   onClick={() => handleViewChange('promotions')}
                   type="button"
                 >
-                  🎓 Mis Promociones
+                   Mis Promociones
                 </button>
               </div>
             )}

@@ -1,8 +1,10 @@
 // services/promotionNFTLoader.ts
 import { ethers } from 'ethers';
 
-// ✅ Dirección del contrato de promoción
-export const PROMOTION_CONTRACT_ADDRESS = "0x0e6586512ba0e1395C4576267CC8c62f5a4EA18C";
+// ✅ Dirección del contrato de promoción cambiar en produccion
+//test 0x0e6586512ba0e1395C4576267CC8c62f5a4EA18C
+// test 2 0xcdfB098192a9714D9338E35A887bcf8286833EdF
+export const PROMOTION_CONTRACT_ADDRESS = "0xcdfB098192a9714D9338E35A887bcf8286833EdF";
 
 // ✅ ABI mínimo necesario para leer promociones
 export const PROMOTION_CONTRACT_ABI = [

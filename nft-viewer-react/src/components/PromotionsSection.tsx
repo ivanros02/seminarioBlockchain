@@ -128,7 +128,7 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({ walletAddr
               <h3>No tienes promociones aún</h3>
               <p>Cuando un profesor te promocione, aparecerá aquí tu certificado.</p>
               <div className="empty-info">
-                <small>Contrato: 0x0e6586512ba0e1395C4576267CC8c62f5a4EA18C</small>
+                <small>Contrato: ???</small>
               </div>
             </div>
           ) : (

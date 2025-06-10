@@ -6,14 +6,16 @@ import { LoadingState } from './LoadingState';
 import { ErrorState } from './ErrorState';
 import { NFTSection } from './NFTSection';
 import { CertificateViewer } from './CertificateViewer';
-import { ProfessorView } from './ProfessorView'; // ✅ Nuevo import
-import { ProfessorService } from '../services/professorService'; // ✅ Nuevo import
+import { ProfessorView } from './ProfessorView';
+import { PromotionsSection } from './PromotionsSection'; // ✅ NUEVO import
+import { ProfessorService } from '../services/professorService';
 import '../styles/home.css';
 
 export default function NFTViewer() {
-  // ✅ Estado para mostrar/ocultar el visualizador
+  // ✅ Estados para mostrar/ocultar diferentes vistas
   const [showViewer, setShowViewer] = useState(false);
-  const [isProfessor, setIsProfessor] = useState(false); // ✅ Estado para profesor
+  const [showPromotions, setShowPromotions] = useState(false); // ✅ NUEVO estado
+  const [isProfessor, setIsProfessor] = useState(false);
   
   const {
     walletAddress,
@@ -23,7 +25,6 @@ export default function NFTViewer() {
     validationResult,
     conectarWallet,
     handleMintTP,
-    // ✅ Nuevos estados de mint
     isMinting,
     mintResults,
     mintError
@@ -42,15 +43,23 @@ export default function NFTViewer() {
       const isProf = ProfessorService.isProfessorWallet(walletAddress);
       setIsProfessor(isProf);
       
-      // Si es profesor, no mostrar el visualizador por defecto
+      // Si es profesor, no mostrar visualizadores por defecto
       if (isProf) {
         setShowViewer(false);
+        setShowPromotions(false);
       }
     } else {
       setIsProfessor(false);
       setShowViewer(false);
+      setShowPromotions(false);
     }
   }, [walletAddress]);
+
+  // ✅ Función para cambiar entre vistas
+  const handleViewChange = (view: 'validation' | 'certificates' | 'promotions') => {
+    setShowViewer(view === 'certificates');
+    setShowPromotions(view === 'promotions');
+  };
 
   return (
     <div className="viewer-container">
@@ -60,22 +69,48 @@ export default function NFTViewer() {
           <header className="mb-3">
             <h1 className="main-title">🎓 Visualizador de NFTs UNQ</h1>
             
-            {/* ✅ Botón para toggle del visualizador */}
-            <button
-              className="toggle-viewer-btn"
-              onClick={() => setShowViewer(!showViewer)}
-              type="button"
-            >
-              {showViewer ? '🔙 Volver a Validación' : '🔍 Ver Certificados TP'}
-            </button>
+            {/* ✅ Navegación entre vistas */}
+            {computedStates.isWalletConnected && !isProfessor && (
+              <div className="view-navigation">
+                <button
+                  className={`nav-btn ${!showViewer && !showPromotions ? 'active' : ''}`}
+                  onClick={() => handleViewChange('validation')}
+                  type="button"
+                >
+                  🎯 Validación
+                </button>
+                
+                <button
+                  className={`nav-btn ${showViewer ? 'active' : ''}`}
+                  onClick={() => handleViewChange('certificates')}
+                  type="button"
+                >
+                  🔍 Certificados TP
+                </button>
+                
+                <button
+                  className={`nav-btn ${showPromotions ? 'active' : ''}`}
+                  onClick={() => handleViewChange('promotions')}
+                  type="button"
+                >
+                  🎓 Mis Promociones
+                </button>
+              </div>
+            )}
           </header>
 
-          {/* ✅ Condicional: Vista de profesor, visualizador, o validación */}
+          {/* ✅ Condicional: Vista según el tipo de usuario y selección */}
           {isProfessor ? (
+            // Vista de profesor
             <ProfessorView walletAddress={walletAddress} />
+          ) : showPromotions ? (
+            // ✅ NUEVA: Vista de promociones
+            <PromotionsSection walletAddress={walletAddress} />
           ) : showViewer ? (
+            // Vista de certificados TP
             <CertificateViewer />
           ) : (
+            // Vista principal de validación
             <>
               {/* 🔘 Botón principal */}
               <button
@@ -97,7 +132,6 @@ export default function NFTViewer() {
 
                   <WalletStatus walletAddress={walletAddress} />
                   
-                  {/* ✅ Pasar nuevos props de mint */}
                   <ValidationPanel
                     validationResult={validationResult}
                     nftsCount={nfts.length}
@@ -113,7 +147,7 @@ export default function NFTViewer() {
               {loading && <LoadingState />}
               {error && <ErrorState error={error} />}
 
-              {/* 📦 Lista de NFTs */}
+              {/* 📦 Lista de NFTs UNQ (solo en vista de validación) */}
               {computedStates.shouldShowNFTList && <NFTSection nfts={nfts} />}
             </>
           )}

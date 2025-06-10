@@ -1,9 +1,13 @@
 // constants/tpConstants.ts
 
 // 🎯 Contrato NFT TP en Sepolia
-export const TP_CONTRACT_ADDRESS = "0x3ae047900d3BB2E38F209eD59E970838d2EA479C";
+//original 0x3ae047900d3BB2E38F209eD59E970838d2EA479C
+//test 0xB80069e028AbC340F4670E7a412AC5d86A198ddf
+// test doble wallet 0x9C8F4F8FF29DB792Cd58FA16DeE22d38c0b5CAeE
+// PRODUCCIÓN: 0x283c30C8D7Bd81828C0EA911581022F79550fc04
+export const TP_CONTRACT_ADDRESS = "0x9C8F4F8FF29DB792Cd58FA16DeE22d38c0b5CAeE";
 
-// 🔑 ABI completo del contrato NFTTP
+// 🔑 ABI para contrato de PRODUCCIÓN (sin professorType)
 export const TP_CONTRACT_ABI = [
   // Constructor y eventos
   {
@@ -46,6 +50,32 @@ export const TP_CONTRACT_ABI = [
       }
     ],
     "name": "CertificateMinted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "AuthorizedWalletAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "AuthorizedWalletRemoved",
     "type": "event"
   },
   
@@ -137,7 +167,25 @@ export const TP_CONTRACT_ABI = [
     "stateMutability": "view",
     "type": "function"
   },
-  
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUNQTokenIds",
+    "outputs": [
+      {
+        "internalType": "uint256[10]",
+        "name": "",
+        "type": "uint256[10]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
   {
     "inputs": [
       {
@@ -157,7 +205,34 @@ export const TP_CONTRACT_ABI = [
     "stateMutability": "view",
     "type": "function"
   },
-  
+  {
+    "inputs": [],
+    "name": "getProfessorsInfo",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "pablo",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "daniel",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "pabloName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "danielName",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
   {
     "inputs": [],
     "name": "totalSupply",
@@ -171,7 +246,6 @@ export const TP_CONTRACT_ABI = [
     "stateMutability": "view",
     "type": "function"
   },
-  
   {
     "inputs": [
       {
@@ -196,7 +270,6 @@ export const TP_CONTRACT_ABI = [
     "stateMutability": "view",
     "type": "function"
   },
-  
   {
     "inputs": [
       {
@@ -217,7 +290,7 @@ export const TP_CONTRACT_ABI = [
     "type": "function"
   },
   
-  // Función admin
+  // Funciones admin
   {
     "inputs": [
       {
@@ -230,6 +303,143 @@ export const TP_CONTRACT_ABI = [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "removeAuthorizedWallet",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "newBaseURI",
+        "type": "string"
+      }
+    ],
+    "name": "setBaseURI",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBaseURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "safeTransferFrom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "ids",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "safeBatchTransferFrom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
 
@@ -238,7 +448,7 @@ export interface MintTPRequest {
   recipientAddress: string;
   studentName: string;
   unqTokenIds: number[];
-  customDate?: string; // ✅ Fecha opcional
+  customDate?: string;
 }
 
 export interface CertificateInfo {
@@ -249,5 +459,5 @@ export interface CertificateInfo {
   unqTokenIds: number[];
   mintTimestamp: number;
   exists: boolean;
-  mintDate: string; // Fecha formateada YYYY-MM-DD
+  mintDate: string;
 }

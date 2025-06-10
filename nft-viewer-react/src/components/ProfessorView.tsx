@@ -1,12 +1,10 @@
-
-
-// Pausa para no sobrecargar la API (tanto Alchemy como contrato)
-await new Promise(resolve => setTimeout(resolve, 300));// components/ProfessorView.tsx
+// components/ProfessorView.tsx
 import React, { useState } from 'react';
 import { useProfessor } from '../hooks/useProfessor';
-import { AlchemyService } from '../services/alchemyService'; // ✅ Para metadata básica
-import { ContractService } from '../services/contractService'; // ✅ Para datos específicos
+import { AlchemyService } from '../services/alchemyService';
+import { ContractService } from '../services/contractService';
 import NFTCard from './NFTCard';
+import { PromotionSection } from './PromotionSection'; // ✅ Importar PromotionSection
 import type { ProfessorNFT } from '../services/professorService';
 import type { NFT } from '../types/NFT';
 
@@ -96,8 +94,7 @@ export const ProfessorView = ({ walletAddress }: ProfessorViewProps) => {
                             <CertificateCard
                                 key={nft.tokenId}
                                 nft={nft}
-                                onPromote={promoteStudent}
-                                promoting={promoting}
+                                professorWallet={walletAddress} // ✅ Pasar wallet del profesor
                                 canPromote={professorData.canPromote}
                             />
                         ))}
@@ -119,23 +116,17 @@ export const ProfessorView = ({ walletAddress }: ProfessorViewProps) => {
 // Componente para cada certificado individual
 interface CertificateCardProps {
     nft: ProfessorNFT;
-    onPromote: (certificate: any) => Promise<void>;
-    promoting: boolean;
+    professorWallet: string; // ✅ Wallet del profesor
     canPromote: boolean;
 }
 
-const CertificateCard = ({ nft, onPromote, promoting, canPromote }: CertificateCardProps) => {
+const CertificateCard = ({ nft, professorWallet, canPromote }: CertificateCardProps) => {
     const { certificate } = nft;
     const [showUNQNFTs, setShowUNQNFTs] = useState(false);
     const [unqNFTs, setUnqNFTs] = useState<NFT[]>([]);
     const [loadingUNQ, setLoadingUNQ] = useState(false);
     const [loadedCount, setLoadedCount] = useState(0);
     const [errorUNQ, setErrorUNQ] = useState<string | null>(null);
-
-    const handlePromote = () => {
-        if (!canPromote || promoting) return;
-        onPromote(certificate);
-    };
 
     // ✅ Función para cargar NFTs UNQ usando tu lógica existente
     const handleToggleUNQNFTs = async () => {
@@ -159,17 +150,15 @@ const CertificateCard = ({ nft, onPromote, promoting, canPromote }: CertificateC
                         // ✅ Paso 1: Obtener metadata básica de Alchemy
                         const metadata = await AlchemyService.getNFTMetadata(tokenId.toString());
 
-                        // ✅ Paso 2: Obtener datos específicos del contrato (como en tu NFTLoader)
+                        // ✅ Paso 2: Obtener datos específicos del contrato
                         const { clase, tema, alumno } = await ContractService.getDatosDeClases(tokenId);
 
-                        // ✅ Paso 3: Combinar datos (exactamente como en tu NFTLoader)
+                        // ✅ Paso 3: Combinar datos
                         const nftData: NFT = {
                             tokenId: tokenId,
                             name: metadata?.metadata?.name || "Sin nombre",
                             description: metadata?.metadata?.description || "Sin descripción",
                             image: metadata?.media?.[0]?.gateway || metadata?.metadata?.image || "",
-
-                            // ✅ Datos del contrato (no de Alchemy attributes)
                             clase,
                             tema,
                             alumno
@@ -177,6 +166,11 @@ const CertificateCard = ({ nft, onPromote, promoting, canPromote }: CertificateC
 
                         loadedNFTs.push(nftData);
                         console.log(`✅ NFT UNQ #${tokenId} cargado:`, { clase, tema, alumno });
+                        setLoadedCount(i + 1);
+
+                        // Pausa para no sobrecargar la API
+                        await new Promise(resolve => setTimeout(resolve, 300));
+
                     } catch (tokenError) {
                         console.error(`❌ Error cargando NFT #${tokenId}:`, tokenError);
 
@@ -256,7 +250,7 @@ const CertificateCard = ({ nft, onPromote, promoting, canPromote }: CertificateC
                     </div>
 
                     {!showUNQNFTs ? (
-                        // ✅ Vista compacta (como antes)
+                        // ✅ Vista compacta
                         <div className="unq-ids">
                             {certificate.unqTokenIds.slice(0, 5).map((id, index) => (
                                 <span key={index} className="unq-id">#{id}</span>
@@ -300,18 +294,14 @@ const CertificateCard = ({ nft, onPromote, promoting, canPromote }: CertificateC
                 </div>
             </div>
 
-            <div className="card-actions">
-                <button
-                    className={`promote-btn ${canPromote ? 'enabled' : 'disabled'}`}
-                    onClick={handlePromote}
-                    disabled={!canPromote || promoting}
-                >
-                    {promoting ? (
-                        <>⏳ Promocionando...</>
-                    ) : (
-                        <>🎓 PROMOCIONAR</>
-                    )}
-                </button>
+            {/* ✅ NUEVA SECCIÓN DE PROMOCIÓN */}
+            <div className="card-promotion">
+                <PromotionSection
+                    professorWallet={professorWallet}
+                    canPromote={canPromote}
+                    studentWallet={certificate.studentWallet}
+                    studentName={certificate.studentName}
+                />
             </div>
         </div>
     );

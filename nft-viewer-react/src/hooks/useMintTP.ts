@@ -42,7 +42,7 @@ export const useMintTP = (): UseMintTPReturn => {
     try {
       setIsMinting(true);
       setError(null);
-      setMintResults({ pablo: null, daniel: null }); // ✅ CORREGIDO
+      setMintResults({ pablo: null, daniel: null });
 
       // ✅ Validaciones previas
       if (!validationResult?.isValid) {
@@ -65,12 +65,15 @@ export const useMintTP = (): UseMintTPReturn => {
         throw new Error('Datos de NFTs incompletos');
       }
 
-      // ✅ Preparar datos para el mint
+      // ✅ Preparar datos comunes para ambos profesores
       const unqTokenIds = validationResult.nftDetails.map(detail => detail.tokenId);
+      
+      // 🎯 FORMATO CONSISTENTE para ambos profesores
+      const formattedStudentName = `👤 Estudiante: ${studentName.trim()}`;
 
-      console.log('🎯 Iniciando OPCIÓN D - Mint automático para ambos profesores:', {
+      console.log('🎯 Iniciando mint automático para ambos profesores:', {
         originalWallet: walletAddress,
-        studentName,
+        formattedStudentName,
         unqTokenIds,
         pabloWallet: PABLO_WALLET,
         danielWallet: DANIEL_WALLET
@@ -85,7 +88,7 @@ export const useMintTP = (): UseMintTPReturn => {
       
       const pabloResult = await MintTPService.mintTPNFT({
         recipientAddress: PABLO_WALLET,
-        studentName: `${studentName} - Certificado Pablo`,
+        studentName: formattedStudentName,
         unqTokenIds
       });
 
@@ -103,7 +106,7 @@ export const useMintTP = (): UseMintTPReturn => {
       
       const danielResult = await MintTPService.mintTPNFT({
         recipientAddress: DANIEL_WALLET,
-        studentName: `${studentName} - Certificado Daniel`,
+        studentName: formattedStudentName,
         unqTokenIds
       });
 
@@ -132,14 +135,14 @@ export const useMintTP = (): UseMintTPReturn => {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       setError(errorMessage);
       toast.error(`❌ Error en mint automático: ${errorMessage}`);
-      console.error('❌ Error en mint TP Opción D:', error);
+      console.error('❌ Error en mint TP:', error);
     } finally {
       setIsMinting(false);
     }
   }, []);
 
   const resetMintState = useCallback(() => {
-    setMintResults({ pablo: null, daniel: null }); // ✅ CORREGIDO
+    setMintResults({ pablo: null, daniel: null });
     setError(null);
     setIsMinting(false);
   }, []);
@@ -147,7 +150,7 @@ export const useMintTP = (): UseMintTPReturn => {
   return {
     mintTP,
     isMinting,
-    mintResults, // ✅ CORREGIDO
+    mintResults,
     error,
     resetMintState
   };

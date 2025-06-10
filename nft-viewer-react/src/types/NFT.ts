@@ -7,3 +7,14 @@ export interface NFT {
   tema: string;
   alumno: string;
 }
+
+// ✅ Tipo para NFT de promoción
+export interface PromotionNFT {
+  tokenId: number;
+  studentName: string;
+  promotionText: string;
+  professorName: string;
+  promotionDate: string;
+  balance: number;
+  type: 'promotion'; // ✅ Identificador de tipo
+}

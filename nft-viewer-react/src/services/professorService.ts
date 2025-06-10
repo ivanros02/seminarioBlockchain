@@ -1,14 +1,17 @@
 // services/professorService.ts
 import { ethers } from 'ethers';
 import { TP_CONTRACT_ADDRESS, TP_CONTRACT_ABI, type CertificateInfo } from '../constants/tpConstants';
+import { PromotionService, type PromotionRequest, type PromotionResult } from './promotionService';
 
 // ✅ Re-exportar CertificateInfo para que esté disponible
 export type { CertificateInfo } from '../constants/tpConstants';
+export type { PromotionResult } from './promotionService';
 
 // 🎓 Wallets de profesores
 export const PROFESSOR_WALLETS = {
     PABLO: "0x96664195a728321F0F672B3BA29639eD727CE7a1",
-    DANIEL: "0x81Bce31CaB4F37DdC8561550Ee7eaa859ca50581"
+    DANIEL: "0x81Bce31CaB4F37DdC8561550Ee7eaa859ca50581",
+    TEST: "1"
 } as const;
 
 export interface ProfessorNFT {
@@ -30,24 +33,13 @@ export class ProfessorService {
 
     /**
      * 🔍 Verificar si una wallet es de profesor
-     *  
-
-             static isProfessorWallet(walletAddress: string): boolean {
-      const address = walletAddress.toLowerCase();
-      return address === PROFESSOR_WALLETS.PABLO.toLowerCase() || 
-             address === PROFESSOR_WALLETS.DANIEL.toLowerCase();
-    }
-    }
-     * 
      */
-
     static isProfessorWallet(walletAddress: string): boolean {
       const address = walletAddress.toLowerCase();
       return address === PROFESSOR_WALLETS.PABLO.toLowerCase() || 
-             address === PROFESSOR_WALLETS.DANIEL.toLowerCase();
+             address === PROFESSOR_WALLETS.DANIEL.toLowerCase() ||
+             address === PROFESSOR_WALLETS.TEST.toLowerCase();
     }
-
-
 
     /**
      * 👤 Obtener nombre del profesor
@@ -56,6 +48,7 @@ export class ProfessorService {
         const address = walletAddress.toLowerCase();
         if (address === PROFESSOR_WALLETS.PABLO.toLowerCase()) return "Pablo";
         if (address === PROFESSOR_WALLETS.DANIEL.toLowerCase()) return "Daniel";
+        if (address === PROFESSOR_WALLETS.TEST.toLowerCase()) return "Test";
         return "Desconocido";
     }
 
@@ -136,7 +129,10 @@ export class ProfessorService {
         const professorName = this.getProfessorName(walletAddress);
         const nfts = await this.getProfessorTPNFTs(walletAddress);
         const hasTPNFT = nfts.length > 0;
-        const canPromote = hasTPNFT; // Puede promocionar si tiene al menos un NFT TP
+        
+        // ✅ Verificar si puede promocionar usando el servicio de promoción
+        const canPromoteFromContract = await PromotionService.canProfessorPromote(walletAddress);
+        const canPromote = hasTPNFT && canPromoteFromContract;
 
         return {
             walletAddress,
@@ -149,26 +145,92 @@ export class ProfessorService {
     }
 
     /**
-     * 🎯 Acción de promocionar (placeholder)
+     * 🎯 Promocionar estudiante usando el contrato de promoción
      */
-    static async promoteStudent(professorWallet: string, studentCertificate: CertificateInfo): Promise<boolean> {
+    static async promoteStudent(
+        professorWallet: string, 
+        studentWallet: string,
+        studentName: string,
+        promotionText: string
+    ): Promise<PromotionResult> {
         try {
-            console.log('🎓 Promocionando estudiante:', {
+            console.log('🎓 Iniciando promoción de estudiante:', {
                 profesor: this.getProfessorName(professorWallet),
-                estudiante: studentCertificate.studentName,
-                tokenId: studentCertificate.tokenId
+                estudiante: studentName,
+                texto: promotionText
             });
 
-            // Aquí puedes implementar la lógica de promoción
-            // Por ejemplo: crear un nuevo NFT de "Promoción", actualizar base de datos, etc.
+            // ✅ Verificar que el profesor puede promocionar
+            const canPromote = await PromotionService.canProfessorPromote(professorWallet);
+            if (!canPromote) {
+                throw new Error('Profesor no autorizado o no tiene NFT TP requerido');
+            }
 
-            // Simulación de promoción exitosa
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // ✅ Crear request de promoción
+            const promotionRequest: PromotionRequest = {
+                studentWallet,
+                studentName,
+                promotionText
+            };
 
-            return true;
+            // ✅ Ejecutar promoción a través del servicio
+            const result = await PromotionService.promoteStudent(promotionRequest);
+
+            if (result.success) {
+                console.log('🎉 Promoción exitosa:', result);
+            } else {
+                console.error('❌ Error en promoción:', result.error);
+            }
+
+            return result;
+
         } catch (error) {
             console.error('❌ Error promocionando estudiante:', error);
-            return false;
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            
+            return {
+                success: false,
+                error: errorMessage
+            };
+        }
+    }
+
+    /**
+     * 📊 Obtener estadísticas del profesor
+     */
+    static async getProfessorStats(walletAddress: string): Promise<{
+        totalTPCertificates: number;
+        totalPromotions: number;
+        canPromote: boolean;
+    }> {
+        try {
+            const professorData = await this.getProfessorData(walletAddress);
+            
+            // Total de certificados TP que tiene el profesor
+            const totalTPCertificates = professorData.nfts.length;
+            
+            // Total de promociones creadas (si el contrato está disponible)
+            let totalPromotions = 0;
+            try {
+                // Esto requeriría implementar getProfessorPromotions en PromotionService
+                // totalPromotions = await PromotionService.getProfessorPromotions(walletAddress);
+            } catch {
+                totalPromotions = 0;
+            }
+
+            return {
+                totalTPCertificates,
+                totalPromotions,
+                canPromote: professorData.canPromote
+            };
+
+        } catch (error) {
+            console.error('❌ Error obteniendo estadísticas del profesor:', error);
+            return {
+                totalTPCertificates: 0,
+                totalPromotions: 0,
+                canPromote: false
+            };
         }
     }
 }

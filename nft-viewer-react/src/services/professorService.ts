@@ -11,7 +11,7 @@ export type { PromotionResult } from './promotionService';
 export const PROFESSOR_WALLETS = {
     PABLO: "0x96664195a728321F0F672B3BA29639eD727CE7a1",
     DANIEL: "0x81Bce31CaB4F37DdC8561550Ee7eaa859ca50581",
-    TEST: "0xa34Bb3b93C7DA0F87D65ed1FC67C4b402bEf9A35"
+    TEST: "0xa34Bb3b93C7DA0F87D65ed1FC67C4b402bEf9A351"
 } as const;
 
 export interface ProfessorNFT {
@@ -145,19 +145,21 @@ export class ProfessorService {
     }
 
     /**
-     * 🎯 Promocionar estudiante usando el contrato de promoción
+     * 🎯 Promocionar estudiante usando el contrato de promoción - ACTUALIZADO CON GRADE
      */
     static async promoteStudent(
         professorWallet: string, 
         studentWallet: string,
         studentName: string,
-        promotionText: string
+        promotionText: string,
+        grade: string // ✅ AGREGADO PARÁMETRO GRADE
     ): Promise<PromotionResult> {
         try {
             console.log('🎓 Iniciando promoción de estudiante:', {
                 profesor: this.getProfessorName(professorWallet),
                 estudiante: studentName,
-                texto: promotionText
+                texto: promotionText,
+                nota: grade // ✅ AGREGADO AL LOG
             });
 
             // ✅ Verificar que el profesor puede promocionar
@@ -166,11 +168,12 @@ export class ProfessorService {
                 throw new Error('Profesor no autorizado o no tiene NFT TP requerido');
             }
 
-            // ✅ Crear request de promoción
+            // ✅ Crear request de promoción - ACTUALIZADO CON GRADE
             const promotionRequest: PromotionRequest = {
                 studentWallet,
                 studentName,
-                promotionText
+                promotionText,
+                grade // ✅ AGREGADO CAMPO GRADE
             };
 
             // ✅ Ejecutar promoción a través del servicio
@@ -230,6 +233,54 @@ export class ProfessorService {
                 totalTPCertificates: 0,
                 totalPromotions: 0,
                 canPromote: false
+            };
+        }
+    }
+
+    /**
+     * 🎯 NUEVA FUNCIÓN: Promocionar estudiante con validación de nota
+     */
+    static async promoteStudentWithValidation(
+        professorWallet: string,
+        studentWallet: string,
+        studentName: string,
+        promotionText: string,
+        grade: string
+    ): Promise<PromotionResult> {
+        try {
+            // ✅ Validaciones adicionales de nota
+            if (!grade || grade.trim().length === 0) {
+                throw new Error('La nota es requerida');
+            }
+
+            if (grade.length > 50) {
+                throw new Error('La nota no puede exceder 50 caracteres');
+            }
+
+            // ✅ Validar formato de nota si es numérica
+            const numericGrade = parseFloat(grade);
+            if (!isNaN(numericGrade)) {
+                if (numericGrade < 0 || numericGrade > 100) {
+                    console.warn('⚠️ Nota numérica fuera del rango típico 0-100:', numericGrade);
+                }
+            }
+
+            // ✅ Proceder con la promoción
+            return await this.promoteStudent(
+                professorWallet,
+                studentWallet,
+                studentName,
+                promotionText,
+                grade
+            );
+
+        } catch (error) {
+            console.error('❌ Error en validación de promoción:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            
+            return {
+                success: false,
+                error: errorMessage
             };
         }
     }

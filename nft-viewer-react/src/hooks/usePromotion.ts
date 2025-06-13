@@ -8,7 +8,8 @@ interface UsePromotionReturn {
     professorWallet: string,
     studentWallet: string,
     studentName: string,
-    promotionText: string
+    promotionText: string,
+    grade: string // ✅ AGREGADO PARÁMETRO GRADE
   ) => Promise<PromotionResult>;
   isPromoting: boolean;
   promotionResult: PromotionResult | null;
@@ -26,7 +27,8 @@ export const usePromotion = (): UsePromotionReturn => {
     professorWallet: string,
     studentWallet: string,
     studentName: string,
-    promotionText: string
+    promotionText: string,
+    grade: string // ✅ AGREGADO PARÁMETRO GRADE
   ): Promise<PromotionResult> => {
     try {
       setIsPromoting(true);
@@ -36,16 +38,22 @@ export const usePromotion = (): UsePromotionReturn => {
       console.log('🎓 Iniciando promoción:', {
         profesor: professorWallet,
         estudiante: { wallet: studentWallet, nombre: studentName },
-        texto: promotionText
+        texto: promotionText,
+        nota: grade // ✅ AGREGADO AL LOG
       });
 
-      // Validaciones básicas
-      if (!studentWallet || !studentName.trim() || !promotionText.trim()) {
-        throw new Error('Todos los campos son requeridos');
+      // ✅ Validaciones básicas actualizadas
+      if (!studentWallet || !studentName.trim() || !promotionText.trim() || !grade.trim()) {
+        throw new Error('Todos los campos son requeridos (incluida la nota)');
       }
 
       if (promotionText.length > 500) {
         throw new Error('El texto de promoción es muy largo (máximo 500 caracteres)');
+      }
+
+      // ✅ NUEVA VALIDACIÓN DE NOTA
+      if (grade.length > 50) {
+        throw new Error('La nota es muy larga (máximo 50 caracteres)');
       }
 
       // Verificar que el profesor puede promocionar
@@ -56,11 +64,12 @@ export const usePromotion = (): UsePromotionReturn => {
 
       toast.info('🚀 Iniciando promoción del estudiante...');
 
-      // Ejecutar promoción
+      // ✅ Ejecutar promoción con grade incluido
       const result = await PromotionService.promoteStudent({
         studentWallet,
         studentName: studentName.trim(),
-        promotionText: promotionText.trim()
+        promotionText: promotionText.trim(),
+        grade: grade.trim() // ✅ AGREGADO CAMPO GRADE
       });
 
       setPromotionResult(result);
@@ -68,6 +77,7 @@ export const usePromotion = (): UsePromotionReturn => {
       if (result.success) {
         toast.success(
           `🎉 ¡Estudiante promocionado exitosamente!\n` +
+          `Nota: ${grade}\n` + // ✅ MOSTRAR NOTA EN SUCCESS
           `Token ID: ${result.tokenId}\n` +
           `Hash: ${result.transactionHash?.slice(0, 10)}...`
         );

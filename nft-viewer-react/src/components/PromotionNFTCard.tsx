@@ -49,6 +49,11 @@ export const PromotionNFTCard: React.FC<PromotionNFTCardProps> = ({ nft }) => {
             <span className="detail-label">🏆 Balance:</span>
             <span className="detail-value">{nft.balance}</span>
           </div>
+
+          <div className="detail-row">
+            <span className="detail-label">🏆 Nota:</span>
+            <span className="detail-value">{nft.grade}</span>
+          </div>
         </div>
 
         {/* Texto de promoción */}

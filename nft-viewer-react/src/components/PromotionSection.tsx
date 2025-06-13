@@ -19,6 +19,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 }) => {
   const [showPromotionForm, setShowPromotionForm] = useState(false);
   const [promotionText, setPromotionText] = useState('');
+  const [grade, setGrade] = useState(''); // ✅ NUEVO ESTADO PARA NOTA
   const [editableStudentName, setEditableStudentName] = useState('');
 
   // ✅ Usar usePromotion correctamente
@@ -33,6 +34,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
   const handleShowPromotionForm = useCallback(() => {
     setShowPromotionForm(true);
     setPromotionText('');
+    setGrade(''); // ✅ RESETEAR NOTA
     setEditableStudentName(studentName); // Inicializar con el nombre del certificado
     resetPromotionState(); // Reset del estado de promoción
   }, [resetPromotionState, studentName]);
@@ -40,6 +42,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
   const handleHidePromotionForm = useCallback(() => {
     setShowPromotionForm(false);
     setPromotionText('');
+    setGrade(''); // ✅ RESETEAR NOTA
     setEditableStudentName('');
     resetPromotionState();
   }, [resetPromotionState]);
@@ -55,17 +58,30 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
       return;
     }
 
+    // ✅ VALIDACIÓN DE NOTA
+    if (!grade.trim()) {
+      toast.error("La nota es requerida");
+      return;
+    }
+
     if (promotionText.length > 500) {
       toast.error("El texto es muy largo (máximo 500 caracteres)");
       return;
     }
 
-    // ✅ Usar usePromotion con los 4 parámetros requeridos
+    // ✅ VALIDACIÓN DE NOTA - LONGITUD
+    if (grade.length > 50) {
+      toast.error("La nota es muy larga (máximo 50 caracteres)");
+      return;
+    }
+
+    // ✅ Usar usePromotion con los 5 parámetros requeridos (incluyendo grade)
     const result = await promoteStudent(
       professorWallet,
       studentWallet,
       editableStudentName.trim(),
-      promotionText.trim()
+      promotionText.trim(),
+      grade.trim() // ✅ AGREGAR NOTA
     );
 
     // Si fue exitoso, mantener el formulario abierto para mostrar el resultado
@@ -73,7 +89,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
       // No cerrar el formulario inmediatamente para mostrar el éxito
       console.log('🎉 Promoción exitosa:', result);
     }
-  }, [professorWallet, studentWallet, editableStudentName, promotionText, promoteStudent]);
+  }, [professorWallet, studentWallet, editableStudentName, promotionText, grade, promoteStudent]);
 
   // Si hay resultado exitoso, mostrar detalles
   if (promotionResult?.success) {
@@ -113,6 +129,14 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               </div>
             </div>
 
+            {/* ✅ MOSTRAR NOTA EN RESULTADO */}
+            <div className="col-sm-6">
+              <div className="bg-warning-subtle border border-warning rounded p-3">
+                <small className="text-muted d-block mb-1">Nota Otorgada</small>
+                <span className="badge bg-warning text-dark fs-6">{grade}</span>
+              </div>
+            </div>
+
             {promotionResult.tokenId && (
               <div className="col-sm-6">
                 <div className="border rounded p-3">
@@ -123,7 +147,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
             )}
 
             {promotionResult.transactionHash && (
-              <div className="col-sm-6">
+              <div className="col-12">
                 <div className="border rounded p-3">
                   <small className="text-muted d-block mb-1">Transaction Hash</small>
                   <code className="small text-truncate d-block">
@@ -234,6 +258,26 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               </div>
             </div>
 
+            {/* ✅ NUEVO CAMPO DE NOTA */}
+            <div className="mb-3">
+              <label htmlFor="grade" className="form-label fw-semibold">
+                Nota <span className="text-danger">*</span>
+              </label>
+              <input
+                id="grade"
+                type="text"
+                className="form-control"
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+                placeholder="Ej: A+, 95, Excelente, 9.5"
+                maxLength={50}
+                disabled={isPromoting}
+              />
+              <div className="form-text">
+                Puedes usar letras (A+, B), números (95, 8.5) o texto (Excelente, Sobresaliente)
+              </div>
+            </div>
+
             {/* Campo texto de promoción */}
             <div className="mb-4">
               <label htmlFor="promotionText" className="form-label fw-semibold">
@@ -273,7 +317,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               
               <button
                 onClick={handlePromoteStudent}
-                disabled={isPromoting || !promotionText.trim() || !editableStudentName.trim()}
+                disabled={isPromoting || !promotionText.trim() || !editableStudentName.trim() || !grade.trim()} // ✅ AGREGAR VALIDACIÓN DE NOTA
                 className="btn btn-primary"
                 type="button"
               >
@@ -310,9 +354,10 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
             </h6>
             <ul className="small mb-0 ps-3">
               <li>Se creará un NFT único para el estudiante</li>
-              <li>El NFT contendrá el nombre y texto personalizado</li>
+              <li>El NFT contendrá el nombre, nota y texto personalizado</li>
               <li>Solo profesores con NFTs TP pueden crear promociones</li>
               <li>La transacción será registrada en la blockchain</li>
+              <li>La nota puede ser alfanumérica (A+, 95, Excelente, etc.)</li>
             </ul>
           </div>
         </div>

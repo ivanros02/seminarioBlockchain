@@ -16,5 +16,6 @@ export interface PromotionNFT {
   professorName: string;
   promotionDate: string;
   balance: number;
+  grade: string; // ✅ AGREGADO CAMPO PARA LA NOTA
   type: 'promotion'; // ✅ Identificador de tipo
 }

@@ -2,9 +2,8 @@
 import { ethers } from 'ethers';
 
 // 🎓 Dirección del contrato de promoción (actualizar después del deploy)
-// test 0x0e6586512ba0e1395C4576267CC8c62f5a4EA18C
-// test 2 0xcdfB098192a9714D9338E35A887bcf8286833EdF
-export const PROMOTION_CONTRACT_ADDRESS = "0xcdfB098192a9714D9338E35A887bcf8286833EdF";
+// test con nota 0x1897D7115Aa6428FFb76a9B2ed09ba3e50cef2E7
+export const PROMOTION_CONTRACT_ADDRESS = "0x1897D7115Aa6428FFb76a9B2ed09ba3e50cef2E7";
 
 // 🔑 ABI del contrato de promoción
 export const PROMOTION_CONTRACT_ABI = [
@@ -50,6 +49,12 @@ export const PROMOTION_CONTRACT_ABI = [
       {
         "indexed": false,
         "internalType": "string",
+        "name": "grade",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
         "name": "professorName",
         "type": "string"
       }
@@ -58,7 +63,7 @@ export const PROMOTION_CONTRACT_ABI = [
     "type": "event"
   },
   
-  // Función principal
+  // Función principal - ACTUALIZADA CON GRADE
   {
     "inputs": [
       {
@@ -74,6 +79,11 @@ export const PROMOTION_CONTRACT_ABI = [
       {
         "internalType": "string",
         "name": "promotionText",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "grade",
         "type": "string"
       }
     ],
@@ -132,6 +142,11 @@ export const PROMOTION_CONTRACT_ABI = [
             "type": "string"
           },
           {
+            "internalType": "string",
+            "name": "grade",
+            "type": "string"
+          },
+          {
             "internalType": "address",
             "name": "studentWallet",
             "type": "address"
@@ -160,6 +175,25 @@ export const PROMOTION_CONTRACT_ABI = [
         "internalType": "struct PromotionCertificate.PromotionData",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPromotionGrade",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -218,10 +252,11 @@ export const PROMOTION_CONTRACT_ABI = [
   }
 ];
 
-// 🏷️ Tipos TypeScript
+// 🏷️ Tipos TypeScript - ACTUALIZADOS CON GRADE
 export interface PromotionData {
   studentName: string;
   promotionText: string;
+  grade: string; // ✅ AGREGADO
   studentWallet: string;
   professorWallet: string;
   professorName: string;
@@ -235,6 +270,7 @@ export interface PromotionRequest {
   studentWallet: string;
   studentName: string;
   promotionText: string;
+  grade: string; // ✅ AGREGADO
 }
 
 export interface PromotionResult {
@@ -267,7 +303,7 @@ export class PromotionService {
   }
 
   /**
-   * 🎯 Promocionar estudiante
+   * 🎯 Promocionar estudiante - ACTUALIZADO CON GRADE
    */
   static async promoteStudent(request: PromotionRequest): Promise<PromotionResult> {
     try {
@@ -298,11 +334,12 @@ export class PromotionService {
         throw new Error('Profesor no autorizado o no tiene NFT TP requerido');
       }
 
-      // ✅ Preparar parámetros para el contrato
+      // ✅ Preparar parámetros para el contrato - ACTUALIZADO CON GRADE
       const promoteParams = [
         request.studentWallet,
         request.studentName,
-        request.promotionText
+        request.promotionText,
+        request.grade // ✅ AGREGADO
       ];
 
       console.log('📝 Parámetros de promoción:', promoteParams);
@@ -400,7 +437,7 @@ export class PromotionService {
   }
 
   /**
-   * 📖 Obtener datos de promoción por token ID
+   * 📖 Obtener datos de promoción por token ID - ACTUALIZADO CON GRADE
    */
   static async getPromotionByTokenId(tokenId: number): Promise<PromotionData | null> {
     try {
@@ -417,6 +454,7 @@ export class PromotionService {
         tokenId,
         studentName: promotion.studentName,
         promotionText: promotion.promotionText,
+        grade: promotion.grade, // ✅ AGREGADO
         studentWallet: promotion.studentWallet,
         professorWallet: promotion.professorWallet,
         professorName: promotion.professorName,
@@ -456,6 +494,27 @@ export class PromotionService {
     } catch (error) {
       console.error('❌ Error obteniendo promociones del estudiante:', error);
       return [];
+    }
+  }
+
+  /**
+   * 🎯 NUEVA FUNCIÓN: Obtener solo la nota de una promoción
+   */
+  static async getPromotionGrade(tokenId: number): Promise<string | null> {
+    try {
+      if (!window.ethereum) {
+        throw new Error('MetaMask no disponible');
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(PROMOTION_CONTRACT_ADDRESS, PROMOTION_CONTRACT_ABI, provider);
+
+      const grade = await contract.getPromotionGrade(tokenId);
+      return grade;
+
+    } catch (error) {
+      console.error('❌ Error obteniendo nota de promoción:', error);
+      return null;
     }
   }
 }

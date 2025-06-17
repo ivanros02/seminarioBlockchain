@@ -2,8 +2,8 @@
 import { ethers } from 'ethers';
 import { TP_CONTRACT_ADDRESS, TP_CONTRACT_ABI, type CertificateInfo } from '../constants/tpConstants';
 import { PromotionService, type PromotionRequest, type PromotionResult } from './promotionService';
-//0xa34Bb3b93C7DA0F87D65ed1FC67C4b402bEf9A35
-// ✅ Re-exportar CertificateInfo para que esté disponible
+
+// ✅ Re-exportar tipos
 export type { CertificateInfo } from '../constants/tpConstants';
 export type { PromotionResult } from './promotionService';
 
@@ -64,18 +64,14 @@ export class ProfessorService {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const contract = new ethers.Contract(TP_CONTRACT_ADDRESS, TP_CONTRACT_ABI, provider);
 
-            // Obtener total supply para iterar
             const totalSupply = await contract.totalSupply();
             const professorNFTs: ProfessorNFT[] = [];
 
-            // Iterar por todos los tokens para encontrar los del profesor
             for (let tokenId = 1; tokenId <= Number(totalSupply); tokenId++) {
                 try {
-                    // Verificar balance del profesor para este token
                     const balance = await contract.balanceOf(walletAddress, tokenId);
 
                     if (Number(balance) > 0) {
-                        // El profesor tiene este NFT, obtener certificado
                         const certificate = await contract.getCertificate(tokenId);
 
                         const professorNFT: ProfessorNFT = {
@@ -96,7 +92,6 @@ export class ProfessorService {
                         professorNFTs.push(professorNFT);
                     }
                 } catch (tokenError) {
-                    // Token no existe o error, continuar
                     continue;
                 }
             }
@@ -145,21 +140,23 @@ export class ProfessorService {
     }
 
     /**
-     * 🎯 Promocionar estudiante usando el contrato de promoción - ACTUALIZADO CON GRADE
+     * 🎯 Promocionar estudiante - ACTUALIZADO con claimedTokenIds
      */
     static async promoteStudent(
         professorWallet: string, 
         studentWallet: string,
         studentName: string,
         promotionText: string,
-        grade: string // ✅ AGREGADO PARÁMETRO GRADE
+        grade: string,
+        claimedTokenIds: number[] = [8, 16, 25, 34, 42, 49, 56, 63, 70, 77] // ✅ NUEVO PARÁMETRO con valores por defecto
     ): Promise<PromotionResult> {
         try {
             console.log('🎓 Iniciando promoción de estudiante:', {
                 profesor: this.getProfessorName(professorWallet),
                 estudiante: studentName,
                 texto: promotionText,
-                nota: grade // ✅ AGREGADO AL LOG
+                nota: grade,
+                nftsReclamados: claimedTokenIds // ✅ AGREGADO AL LOG
             });
 
             // ✅ Verificar que el profesor puede promocionar
@@ -168,12 +165,13 @@ export class ProfessorService {
                 throw new Error('Profesor no autorizado o no tiene NFT TP requerido');
             }
 
-            // ✅ Crear request de promoción - ACTUALIZADO CON GRADE
+            // ✅ Crear request de promoción - ACTUALIZADO con claimedTokenIds
             const promotionRequest: PromotionRequest = {
                 studentWallet,
                 studentName,
                 promotionText,
-                grade // ✅ AGREGADO CAMPO GRADE
+                grade,
+                claimedTokenIds // ✅ CAMPO OBLIGATORIO AGREGADO
             };
 
             // ✅ Ejecutar promoción a través del servicio
@@ -209,13 +207,11 @@ export class ProfessorService {
         try {
             const professorData = await this.getProfessorData(walletAddress);
             
-            // Total de certificados TP que tiene el profesor
             const totalTPCertificates = professorData.nfts.length;
             
-            // Total de promociones creadas (si el contrato está disponible)
             let totalPromotions = 0;
             try {
-                // Esto requeriría implementar getProfessorPromotions en PromotionService
+                // TODO: Implementar getProfessorPromotions en PromotionService
                 // totalPromotions = await PromotionService.getProfessorPromotions(walletAddress);
             } catch {
                 totalPromotions = 0;
@@ -238,23 +234,28 @@ export class ProfessorService {
     }
 
     /**
-     * 🎯 NUEVA FUNCIÓN: Promocionar estudiante con validación de nota
+     * 🎯 Promocionar estudiante con validación completa - ACTUALIZADO
      */
     static async promoteStudentWithValidation(
         professorWallet: string,
         studentWallet: string,
         studentName: string,
         promotionText: string,
-        grade: string
+        grade: string,
+        claimedTokenIds: number[] = [8, 16, 25, 34, 42, 49, 56, 63, 70, 77] // ✅ NUEVO PARÁMETRO
     ): Promise<PromotionResult> {
         try {
-            // ✅ Validaciones adicionales de nota
+            // ✅ Validaciones de entrada
             if (!grade || grade.trim().length === 0) {
                 throw new Error('La nota es requerida');
             }
 
             if (grade.length > 50) {
                 throw new Error('La nota no puede exceder 50 caracteres');
+            }
+
+            if (!claimedTokenIds || claimedTokenIds.length === 0) {
+                throw new Error('Debe especificar al menos un NFT que el estudiante posee');
             }
 
             // ✅ Validar formato de nota si es numérica
@@ -265,13 +266,22 @@ export class ProfessorService {
                 }
             }
 
-            // ✅ Proceder con la promoción
+            // ✅ Pre-validar NFTs del estudiante
+            const nftValidation = await PromotionService.validateStudentNFTs(studentWallet, claimedTokenIds);
+            if (!nftValidation.isValid) {
+                throw new Error(
+                    `Estudiante no posee los siguientes NFTs: ${nftValidation.invalidIds.join(', ')}`
+                );
+            }
+
+            // ✅ Proceder con la promoción incluyendo claimedTokenIds
             return await this.promoteStudent(
                 professorWallet,
                 studentWallet,
                 studentName,
                 promotionText,
-                grade
+                grade,
+                claimedTokenIds // ✅ PASAR PARÁMETRO
             );
 
         } catch (error) {
@@ -283,5 +293,62 @@ export class ProfessorService {
                 error: errorMessage
             };
         }
+    }
+
+    /**
+     * 🔍 NUEVA FUNCIÓN: Validar NFTs de estudiante
+     */
+    static async validateStudentNFTs(
+        studentWallet: string,
+        claimedTokenIds: number[]
+    ): Promise<{ isValid: boolean; invalidIds: number[] }> {
+        try {
+            return await PromotionService.validateStudentNFTs(studentWallet, claimedTokenIds);
+        } catch (error) {
+            console.error('❌ Error validando NFTs desde ProfessorService:', error);
+            return { isValid: false, invalidIds: claimedTokenIds };
+        }
+    }
+
+    /**
+     * 🎓 NUEVA FUNCIÓN: Obtener NFTs de ejemplo para un estudiante
+     */
+    static getDefaultClaimedTokenIds(): number[] {
+        return [8, 16, 25, 34, 42, 49, 56, 63, 70, 77];
+    }
+
+    /**
+     * 📝 NUEVA FUNCIÓN: Formatear nota para mostrar
+     */
+    static formatGrade(grade: string): string {
+        // Si es un número, formatear con decimales apropiados
+        const numericGrade = parseFloat(grade);
+        if (!isNaN(numericGrade)) {
+            return numericGrade % 1 === 0 ? numericGrade.toString() : numericGrade.toFixed(1);
+        }
+        
+        // Si no es numérico, devolver tal como está
+        return grade.trim();
+    }
+
+    /**
+     * ✅ NUEVA FUNCIÓN: Validar formato de nota
+     */
+    static validateGradeFormat(grade: string): { isValid: boolean; message?: string } {
+        if (!grade || grade.trim().length === 0) {
+            return { isValid: false, message: 'La nota es requerida' };
+        }
+
+        if (grade.length > 50) {
+            return { isValid: false, message: 'La nota no puede exceder 50 caracteres' };
+        }
+
+        // Verificar si contiene caracteres especiales problemáticos
+        const invalidChars = /[<>'"&]/;
+        if (invalidChars.test(grade)) {
+            return { isValid: false, message: 'La nota contiene caracteres no permitidos' };
+        }
+
+        return { isValid: true };
     }
 }

@@ -9,13 +9,15 @@ interface UsePromotionReturn {
     studentWallet: string,
     studentName: string,
     promotionText: string,
-    grade: string // ✅ AGREGADO PARÁMETRO GRADE
+    grade: string,
+    claimedTokenIds: number[] // ✅ NUEVO PARÁMETRO OBLIGATORIO
   ) => Promise<PromotionResult>;
   isPromoting: boolean;
   promotionResult: PromotionResult | null;
   error: string | null;
   resetPromotionState: () => void;
   canProfessorPromote: (professorWallet: string) => Promise<boolean>;
+  validateStudentNFTs: (studentWallet: string, claimedTokenIds: number[]) => Promise<{ isValid: boolean; invalidIds: number[] }>; // ✅ NUEVA FUNCIÓN
 }
 
 export const usePromotion = (): UsePromotionReturn => {
@@ -28,7 +30,8 @@ export const usePromotion = (): UsePromotionReturn => {
     studentWallet: string,
     studentName: string,
     promotionText: string,
-    grade: string // ✅ AGREGADO PARÁMETRO GRADE
+    grade: string,
+    claimedTokenIds: number[] // ✅ NUEVO PARÁMETRO
   ): Promise<PromotionResult> => {
     try {
       setIsPromoting(true);
@@ -39,7 +42,8 @@ export const usePromotion = (): UsePromotionReturn => {
         profesor: professorWallet,
         estudiante: { wallet: studentWallet, nombre: studentName },
         texto: promotionText,
-        nota: grade // ✅ AGREGADO AL LOG
+        nota: grade,
+        nftsReclamados: claimedTokenIds // ✅ AGREGADO AL LOG
       });
 
       // ✅ Validaciones básicas actualizadas
@@ -51,9 +55,13 @@ export const usePromotion = (): UsePromotionReturn => {
         throw new Error('El texto de promoción es muy largo (máximo 500 caracteres)');
       }
 
-      // ✅ NUEVA VALIDACIÓN DE NOTA
       if (grade.length > 50) {
         throw new Error('La nota es muy larga (máximo 50 caracteres)');
+      }
+
+      // ✅ NUEVA VALIDACIÓN: NFTs reclamados
+      if (!claimedTokenIds || claimedTokenIds.length === 0) {
+        throw new Error('Debe especificar al menos un NFT que el estudiante posee');
       }
 
       // Verificar que el profesor puede promocionar
@@ -62,14 +70,25 @@ export const usePromotion = (): UsePromotionReturn => {
         throw new Error('Profesor no autorizado o no tiene NFT TP requerido');
       }
 
+      // ✅ Pre-validar NFTs del estudiante (opcional, para mejor UX)
+      toast.info('🔍 Validando NFTs del estudiante...');
+      const nftValidation = await PromotionService.validateStudentNFTs(studentWallet, claimedTokenIds);
+      
+      if (!nftValidation.isValid) {
+        throw new Error(
+          `Estudiante no posee los siguientes NFTs: ${nftValidation.invalidIds.join(', ')}`
+        );
+      }
+
       toast.info('🚀 Iniciando promoción del estudiante...');
 
-      // ✅ Ejecutar promoción con grade incluido
+      // ✅ Ejecutar promoción con todos los campos incluyendo claimedTokenIds
       const result = await PromotionService.promoteStudent({
         studentWallet,
         studentName: studentName.trim(),
         promotionText: promotionText.trim(),
-        grade: grade.trim() // ✅ AGREGADO CAMPO GRADE
+        grade: grade.trim(),
+        claimedTokenIds // ✅ CAMPO OBLIGATORIO AGREGADO
       });
 
       setPromotionResult(result);
@@ -77,7 +96,8 @@ export const usePromotion = (): UsePromotionReturn => {
       if (result.success) {
         toast.success(
           `🎉 ¡Estudiante promocionado exitosamente!\n` +
-          `Nota: ${grade}\n` + // ✅ MOSTRAR NOTA EN SUCCESS
+          `Nota: ${grade}\n` +
+          `NFTs validados: ${claimedTokenIds.length}\n` + // ✅ MOSTRAR CANTIDAD DE NFTs
           `Token ID: ${result.tokenId}\n` +
           `Hash: ${result.transactionHash?.slice(0, 10)}...`
         );
@@ -117,6 +137,19 @@ export const usePromotion = (): UsePromotionReturn => {
     }
   }, []);
 
+  // ✅ NUEVA FUNCIÓN para validar NFTs desde el hook
+  const validateStudentNFTs = useCallback(async (
+    studentWallet: string, 
+    claimedTokenIds: number[]
+  ): Promise<{ isValid: boolean; invalidIds: number[] }> => {
+    try {
+      return await PromotionService.validateStudentNFTs(studentWallet, claimedTokenIds);
+    } catch (error) {
+      console.error('❌ Error validando NFTs:', error);
+      return { isValid: false, invalidIds: claimedTokenIds };
+    }
+  }, []);
+
   const resetPromotionState = useCallback(() => {
     setPromotionResult(null);
     setError(null);
@@ -129,6 +162,7 @@ export const usePromotion = (): UsePromotionReturn => {
     promotionResult,
     error,
     resetPromotionState,
-    canProfessorPromote
+    canProfessorPromote,
+    validateStudentNFTs // ✅ NUEVA FUNCIÓN EXPORTADA
   };
 };

@@ -205,7 +205,7 @@ const CertificateCard = ({ nft, professorWallet, canPromote }: CertificateCardPr
     return (
         <div className="certificate-card">
             <div className="card-header">
-                <h4 className="student-name">👤 {certificate.studentName}</h4>
+                <h4 className="student-name"> {certificate.studentName}</h4>
                 <span className="token-badge">Token #{certificate.tokenId}</span>
             </div>
 
@@ -299,6 +299,7 @@ const CertificateCard = ({ nft, professorWallet, canPromote }: CertificateCardPr
                     canPromote={canPromote}
                     studentWallet={certificate.studentWallet}
                     studentName={certificate.studentName}
+                    tokenIds={certificate.unqTokenIds}
                 />
             </div>
         </div>

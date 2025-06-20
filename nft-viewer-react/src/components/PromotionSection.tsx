@@ -9,22 +9,28 @@ interface PromotionSectionProps {
   canPromote: boolean;
   studentWallet: string;
   studentName: string;
+  tokenIds: number[];
 }
 
 export const PromotionSection: React.FC<PromotionSectionProps> = ({
   professorWallet,
   canPromote,
   studentWallet,
-  studentName
+  studentName,
+  tokenIds
 }) => {
   const [showPromotionForm, setShowPromotionForm] = useState(false);
   const [promotionText, setPromotionText] = useState('');
   const [grade, setGrade] = useState('');
   const [editableStudentName, setEditableStudentName] = useState('');
-  
+
   // ✅ NUEVO ESTADO: IDs de NFTs que el estudiante posee
-  const [claimedTokenIds, setClaimedTokenIds] = useState<number[]>([8, 16, 25, 34, 42, 49, 56, 63, 70, 77]);
+  const [claimedTokenIds, setClaimedTokenIds] = useState<number[]>(tokenIds);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+
+  React.useEffect(() => {
+    setClaimedTokenIds(tokenIds);
+  }, [tokenIds]);
 
   const {
     promoteStudent,
@@ -56,13 +62,13 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
   const handleValidateNFTs = useCallback(async () => {
     try {
       const validation = await validateStudentNFTs(studentWallet, claimedTokenIds);
-      
+
       if (validation.isValid) {
         toast.success(`✅ Todos los NFTs son válidos (${claimedTokenIds.length} verificados)`);
       } else {
         toast.error(`❌ NFTs inválidos: ${validation.invalidIds.join(', ')}`);
       }
-      
+
       return validation.isValid;
     } catch (error) {
       toast.error('Error validando NFTs');
@@ -131,7 +137,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
           }
           return num;
         });
-      
+
       setClaimedTokenIds(ids);
     } catch (error) {
       toast.error('IDs de NFT inválidos. Use números separados por comas o espacios.');
@@ -144,7 +150,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
       <div className="card border-0 shadow-sm">
         <div className="card-body p-4">
           <div className="text-center mb-4">
-            <div className="d-inline-flex align-items-center justify-content-center bg-success-subtle rounded-circle mb-3" style={{width: '60px', height: '60px'}}>
+            <div className="d-inline-flex align-items-center justify-content-center bg-success-subtle rounded-circle mb-3" style={{ width: '60px', height: '60px' }}>
               <i className="bi bi-mortarboard fs-2 text-success"></i>
             </div>
             <h4 className="fw-bold text-success mb-0">¡Promoción Exitosa!</h4>
@@ -241,7 +247,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                 Ver en Etherscan
               </a>
             )}
-            
+
             <button
               onClick={handleHidePromotionForm}
               className="btn btn-secondary"
@@ -260,7 +266,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
     return (
       <div className="card border-warning">
         <div className="card-body p-4 text-center">
-          <div className="d-inline-flex align-items-center justify-content-center bg-warning-subtle rounded-circle mb-3" style={{width: '50px', height: '50px'}}>
+          <div className="d-inline-flex align-items-center justify-content-center bg-warning-subtle rounded-circle mb-3" style={{ width: '50px', height: '50px' }}>
             <i className="bi bi-exclamation-triangle fs-4 text-warning"></i>
           </div>
           <h5 className="card-title text-warning">Promoción No Disponible</h5>
@@ -359,13 +365,6 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                 <label className="form-label fw-semibold mb-0">
                   NFTs del Estudiante <span className="text-danger">*</span>
                 </label>
-                <button
-                  type="button"
-                  className="btn btn-link btn-sm p-0"
-                  onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                >
-                  {showAdvancedOptions ? 'Ocultar' : 'Personalizar'} NFTs
-                </button>
               </div>
 
               {showAdvancedOptions ? (
@@ -381,7 +380,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                       disabled={isPromoting}
                     />
                   </div>
-                  
+
                   <div className="d-flex gap-2 align-items-center">
                     <button
                       type="button"
@@ -392,7 +391,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                       <i className="bi bi-check-circle me-1"></i>
                       Validar NFTs
                     </button>
-                    
+
                     <small className="text-muted">
                       {claimedTokenIds.length} NFT{claimedTokenIds.length !== 1 ? 's' : ''} especificado{claimedTokenIds.length !== 1 ? 's' : ''}
                     </small>
@@ -401,7 +400,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               ) : (
                 <div className="border rounded p-3 bg-info-subtle">
                   <div className="d-flex justify-content-between align-items-center">
-                    <small className="text-muted">NFTs por defecto:</small>
+                    <small className="text-muted">NFTs:</small>
                     <small className="fw-semibold">{claimedTokenIds.length} NFTs</small>
                   </div>
                   <div className="d-flex flex-wrap gap-1 mt-2">
@@ -426,7 +425,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                 <i className="bi bi-x-lg me-1"></i>
                 Cancelar
               </button>
-              
+
               <button
                 onClick={handlePromoteStudent}
                 disabled={isPromoting || !promotionText.trim() || !editableStudentName.trim() || !grade.trim() || claimedTokenIds.length === 0}
@@ -466,7 +465,6 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
               <li>El contrato validará automáticamente que el estudiante posee los NFTs especificados</li>
               <li>Solo se pueden promocionar estudiantes con NFTs válidos del contrato original</li>
               <li>Los NFTs validados quedarán registrados en la promoción</li>
-              <li>Puedes personalizar los IDs o usar la configuración por defecto</li>
             </ul>
           </div>
         </div>
@@ -477,10 +475,10 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
   return (
     <div className="card border-0 shadow-sm">
       <div className="card-body p-4 text-center">
-        <div className="d-inline-flex align-items-center justify-content-center bg-success-subtle rounded-circle mb-3" style={{width: '60px', height: '60px'}}>
+        <div className="d-inline-flex align-items-center justify-content-center bg-success-subtle rounded-circle mb-3" style={{ width: '60px', height: '60px' }}>
           <i className="bi bi-mortarboard fs-2 text-success"></i>
         </div>
-        
+
         <h5 className="card-title text-success mb-2">Promoción Disponible</h5>
         <p className="card-text text-muted mb-4">
           Como profesor con NFTs TP, puedes crear un NFT de promoción personalizado para este estudiante.

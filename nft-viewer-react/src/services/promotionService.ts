@@ -1,7 +1,7 @@
 // services/promotionService.ts
 import { ethers } from 'ethers';
 
-export const PROMOTION_CONTRACT_ADDRESS = "0x1D154bF88a511e112E8C39b6F5e6C274D9986F7b";
+export const PROMOTION_CONTRACT_ADDRESS = "0x722ED31f5278B2441e1Ca52b1dED30a0E68220f2";
 
 // ✅ ABI ACTUALIZADO para el contrato con validación de NFTs
 export const PROMOTION_CONTRACT_ABI = [

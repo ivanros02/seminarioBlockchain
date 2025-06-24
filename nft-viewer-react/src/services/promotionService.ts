@@ -433,7 +433,7 @@ export class PromotionService {
 
       // 2. Verificar si tiene NFT TP (simulamos la lógica del contrato)
       // El contrato verifica tokens 1-5 en el contrato TP
-      const TP_CONTRACT = "0x9C8F4F8FF29DB792Cd58FA16DeE22d38c0b5CAeE";
+      const TP_CONTRACT = "0x283c30C8D7Bd81828C0EA911581022F79550fc04";
       
       for (let tokenId = 1; tokenId <= 5; tokenId++) {
         try {

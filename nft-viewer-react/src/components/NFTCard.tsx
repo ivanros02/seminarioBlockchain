@@ -46,7 +46,6 @@ export default function NFTCard({ nft }: { nft: NFT }) {
                             <span className="eth-symbol">⟠</span>
                             <span>Ethereum NFT</span>
                         </div>
-                        <button className="view-btn">Ver Detalles</button>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { usePromotion } from '../hooks/usePromotion';
 import { ProfessorService } from '../services/professorService';
+import '../styles/PromotionSection.css';
 
 interface PromotionSectionProps {
   professorWallet: string;
@@ -304,7 +305,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="mb-3">
-              <label htmlFor="studentName" className="form-label fw-semibold">
+              <label htmlFor="studentName" className="form-label fw-semibold info-labe">
                 Nombre del Estudiante <span className="text-danger">*</span>
               </label>
               <input
@@ -320,7 +321,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
             </div>
 
             <div className="mb-3">
-              <label htmlFor="grade" className="form-label fw-semibold">
+              <label htmlFor="grade" className="form-label fw-semibold info-labe">
                 Nota <span className="text-danger">*</span>
               </label>
               <input
@@ -336,7 +337,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
             </div>
 
             <div className="mb-4">
-              <label htmlFor="promotionText" className="form-label fw-semibold">
+              <label htmlFor="promotionText" className="form-label fw-semibold info-labe">
                 Texto de Promoción <span className="text-danger">*</span>
               </label>
               <textarea
@@ -349,7 +350,7 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                 rows={4}
                 disabled={isPromoting}
               />
-              <div className="d-flex justify-content-between align-items-center mt-1">
+              <div className="d-flex justify-content-between align-items-center mt-1 info-labe">
                 <div className="form-text">
                   Describe los logros y méritos del estudiante
                 </div>
@@ -361,8 +362,8 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 
             {/* ✅ SECCIÓN AVANZADA: NFTs del Estudiante */}
             <div className="mb-4">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <label className="form-label fw-semibold mb-0">
+              <div className="d-flex justify-content-between align-items-center mb-2 ">
+                <label className="form-label fw-semibold mb-0 info-labe">
                   NFTs del Estudiante <span className="text-danger">*</span>
                 </label>
               </div>
@@ -398,14 +399,14 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="border rounded p-3 bg-info-subtle">
+                <div className="border rounded p-3 ">
                   <div className="d-flex justify-content-between align-items-center">
-                    <small className="text-muted">NFTs:</small>
-                    <small className="fw-semibold">{claimedTokenIds.length} NFTs</small>
+                    <small className="info-labe">NFTs:</small>
+                    <small className="fw-semibold info-labe">{claimedTokenIds.length} NFTs</small>
                   </div>
                   <div className="d-flex flex-wrap gap-1 mt-2">
                     {claimedTokenIds.slice(0, 10).map(id => (
-                      <span key={id} className="badge bg-info text-white">#{id}</span>
+                      <span key={id} className="badge text-white">#{id}</span>
                     ))}
                     {claimedTokenIds.length > 10 && (
                       <span className="badge bg-secondary">+{claimedTokenIds.length - 10} más</span>
@@ -486,10 +487,10 @@ export const PromotionSection: React.FC<PromotionSectionProps> = ({
 
         <button
           onClick={handleShowPromotionForm}
-          className="btn btn-success btn-lg"
+          className="btn btn-success btn-lg "
           type="button"
         >
-          <i className="bi bi-award me-2"></i>
+          <i className="bi bi-award me-2 "></i>
           Crear NFT de Promoción
         </button>
       </div>

@@ -1,0 +1,609 @@
+/* ProfessorView.css */
+:root {
+  --professor-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --error-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  --neutral-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow-modern: 0 8px 32px rgba(31, 38, 135, 0.37);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --border-radius: 16px;
+  --border-radius-small: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+/* Main Container */
+.professor-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Loading State */
+.professor-view.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading-content {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+}
+
+.loading-spinner {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--spacing-md);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* Error State */
+.professor-view.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.error-content {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 36, 0.1) 100%);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  box-shadow: var(--shadow-card);
+}
+
+.error-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.error-content button {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--error-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.error-content button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+/* Professor Header */
+.professor-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--spacing-lg);
+  align-items: center;
+  background: var(--professor-gradient);
+  color: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-modern);
+  position: relative;
+  overflow: hidden;
+}
+
+.professor-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.professor-info {
+  position: relative;
+  z-index: 2;
+}
+
+.professor-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-xs);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.professor-wallet {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  font-family: 'Monaco', 'Consolas', monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-small);
+  display: inline-block;
+}
+
+.professor-stats {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.stat-item {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-small);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-top: var(--spacing-xs);
+}
+
+.status-badge {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-small);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 2px solid transparent;
+}
+
+.status-badge.active {
+  background: rgba(17, 153, 142, 0.2);
+  color: #0d9488;
+  border-color: rgba(17, 153, 142, 0.3);
+}
+
+.status-badge.inactive {
+  background: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Certificates Section */
+.tp-certificates-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.certificates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Certificate Card */
+.certificate-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-card);
+  overflow: visible;
+  transition: var(--transition);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 1;
+}
+
+.certificate-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.certificate-card .card-header {
+  background: var(--neutral-gradient);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.student-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.token-badge {
+  background: var(--professor-gradient);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-small);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.card-content {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Certificate Info */
+.certificate-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.info-value.mono {
+  font-family: 'Monaco', 'Consolas', monospace;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+/* UNQ Preview */
+.unq-preview {
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-md);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.unq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.unq-title {
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.expand-btn {
+  background: var(--professor-gradient);
+  color: white;
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-small);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.expand-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.expand-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* UNQ IDs */
+.unq-ids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.unq-id {
+  background: var(--professor-gradient);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.unq-more {
+  background: #6c757d;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* UNQ Expanded */
+.unq-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.loading-nfts {
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: var(--spacing-sm);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--success-gradient);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.error-loading {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-md);
+  color: #dc2626;
+}
+
+.unq-nfts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.unq-nft-wrapper {
+  transition: var(--transition);
+}
+
+.unq-nft-wrapper:hover {
+  transform: scale(1.02);
+}
+
+/* Card Promotion - Integración completa */
+.card-promotion {
+  margin-top: 0;
+  padding: 0;
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+/* Ocultar la card wrapper del PromotionSection */
+.card-promotion > div:first-child {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+/* Estilos para el contenido directo */
+.card-promotion .card-body {
+  padding: var(--spacing-md) !important;
+  background: transparent !important;
+}
+
+.card-promotion .card-header {
+  background: var(--professor-gradient) !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Forzar transparencia en todos los elementos contenedores */
+.card-promotion .card,
+.card-promotion .card-body,
+.card-promotion > div,
+.card-promotion > div > div:first-child {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Mantener solo el contenido interno visible */
+.card-promotion .d-inline-flex {
+  background: rgba(17, 153, 142, 0.1) !important;
+  border-radius: 50% !important;
+}
+
+.card-promotion .text-center {
+  background: transparent !important;
+  padding: var(--spacing-md) !important;
+}
+
+/* Botones específicos */
+.card-promotion .btn-success {
+  background: var(--success-gradient) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: var(--border-radius-small) !important;
+  padding: 0.875rem 1.5rem !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+}
+
+.card-promotion .btn-success:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4) !important;
+}
+
+/* Asegurar que no hay backgrounds blancos */
+.card-promotion * {
+  background-color: transparent !important;
+}
+
+.card-promotion .btn,
+.card-promotion .badge,
+.card-promotion .form-control,
+.card-promotion .alert {
+  background-color: revert !important;
+}
+
+/* Empty State */
+.no-certificates {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  color: #4a5568;
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+  color: #718096;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .professor-view {
+    padding: var(--spacing-md);
+    gap: var(--spacing-lg);
+  }
+  
+  .professor-header {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    text-align: center;
+    padding: var(--spacing-lg);
+  }
+  
+  .professor-title {
+    font-size: 1.5rem;
+  }
+  
+  .professor-stats {
+    justify-content: center;
+  }
+  
+  .certificates-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-item {
+    padding: var(--spacing-sm);
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  
+  .unq-header {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: stretch;
+  }
+  
+  .expand-btn {
+    width: 100%;
+  }
+  
+  .unq-nfts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .professor-stats {
+    flex-direction: column;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+}

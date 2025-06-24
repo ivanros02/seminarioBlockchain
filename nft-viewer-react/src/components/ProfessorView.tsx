@@ -7,7 +7,7 @@ import NFTCard from './NFTCard';
 import { PromotionSection } from './PromotionSection'; // ✅ Importar PromotionSection
 import type { ProfessorNFT } from '../services/professorService';
 import type { NFT } from '../types/NFT';
-
+import '../styles/ProfessorView.css'
 interface ProfessorViewProps {
     walletAddress: string;
 }
@@ -290,18 +290,20 @@ const CertificateCard = ({ nft, professorWallet, canPromote }: CertificateCardPr
                         </div>
                     )}
                 </div>
+
+                {/* ✅ NUEVA SECCIÓN DE PROMOCIÓN */}
+                <div className="card-promotion">
+                    <PromotionSection
+                        professorWallet={professorWallet}
+                        canPromote={canPromote}
+                        studentWallet={certificate.studentWallet}
+                        studentName={certificate.studentName}
+                        tokenIds={certificate.unqTokenIds}
+                    />
+                </div>
             </div>
 
-            {/* ✅ NUEVA SECCIÓN DE PROMOCIÓN */}
-            <div className="card-promotion">
-                <PromotionSection
-                    professorWallet={professorWallet}
-                    canPromote={canPromote}
-                    studentWallet={certificate.studentWallet}
-                    studentName={certificate.studentName}
-                    tokenIds={certificate.unqTokenIds}
-                />
-            </div>
+
         </div>
     );
 };

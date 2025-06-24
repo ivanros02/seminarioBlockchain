@@ -2,8 +2,7 @@
 import { ethers } from 'ethers';
 
 // ✅ Dirección del contrato de promoción cambiar en produccion
-//test con nota 0x1897D7115Aa6428FFb76a9B2ed09ba3e50cef2E7
-export const PROMOTION_CONTRACT_ADDRESS = "0x1545f699db914A6D1e508354502676d3A0176897";
+export const PROMOTION_CONTRACT_ADDRESS = "0x1D154bF88a511e112E8C39b6F5e6C274D9986F7b";
 
 // ✅ ABI mínimo necesario para leer promociones - ACTUALIZADO CON GRADE
 export const PROMOTION_CONTRACT_ABI = [

@@ -3,10 +3,11 @@ import { toast } from 'react-toastify';
 import { useNFTLoader } from './useNFTLoader';
 import { useValidationMessages } from './useValidationMessages';
 import { useMintTP } from './useMintTP'; // ✅ Import corregido
+import { ProfessorService } from '../services/professorService'; // ✅ AGREGAR IMPORT
 
 export const useWalletConnection = () => {
   const [walletAddress, setWalletAddress] = useState<string>("");
-  
+
   const {
     nfts,
     loading,
@@ -17,7 +18,7 @@ export const useWalletConnection = () => {
   } = useNFTLoader();
 
   const { generateErrorMessages } = useValidationMessages();
-  
+
   // ✅ Nuevo hook de mint TP
   const { mintTP, isMinting, mintResults, error: mintError, resetMintState } = useMintTP();
 
@@ -35,7 +36,7 @@ export const useWalletConnection = () => {
 
     // ✅ Solicitar nombre del estudiante
     const studentName = prompt("Ingresa el nombre del estudiante:")?.trim();
-    
+
     if (!studentName) {
       toast.error("Nombre requerido para el certificado");
       return;
@@ -61,6 +62,16 @@ export const useWalletConnection = () => {
       reset();
       resetMintState(); // ✅ Reset mint state al conectar nueva wallet
 
+      // Solo validar si NO es profesor
+      const isProfessor = ProfessorService.isProfessorWallet(address);
+
+      if (isProfessor) {
+        const professorName = ProfessorService.getProfessorName(address);
+        toast.success(`👨‍🏫 ¡Bienvenido Profesor ${professorName}!`);
+        return;
+      }
+
+      // Solo para estudiantes: ejecutar validaciones
       const { validation } = await loadAndValidateNFTs(address);
 
       if (validation.isValid) {

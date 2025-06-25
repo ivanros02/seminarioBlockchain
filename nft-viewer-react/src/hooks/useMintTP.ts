@@ -24,15 +24,18 @@ export const useMintTP = (): UseMintTPReturn => {
   const [mintResults, setMintResults] = useState<{
     pablo: MintResult | null;
     daniel: MintResult | null;
+    test?: MintResult | null; // Opcional para pruebas
   }>({
     pablo: null,
-    daniel: null
+    daniel: null,
+    test: null
   });
   const [error, setError] = useState<string | null>(null);
 
   // 🎓 Direcciones hardcodeadas de los profesores (del contrato)
   const PABLO_WALLET = '0x96664195a728321F0F672B3BA29639eD727CE7a1';
   const DANIEL_WALLET = '0x81Bce31CaB4F37DdC8561550Ee7eaa859ca50581';
+  const TEST_WALLET = '0x05788623D682889fc8F4024718Be8ec2b0bCe77B';
 
   const mintTP = useCallback(async (
     walletAddress: string,
@@ -42,7 +45,7 @@ export const useMintTP = (): UseMintTPReturn => {
     try {
       setIsMinting(true);
       setError(null);
-      setMintResults({ pablo: null, daniel: null });
+      setMintResults({ pablo: null, daniel: null, test: null });
 
       // ✅ Validaciones previas
       if (!validationResult?.isValid) {
@@ -67,7 +70,7 @@ export const useMintTP = (): UseMintTPReturn => {
 
       // ✅ Preparar datos comunes para ambos profesores
       const unqTokenIds = validationResult.nftDetails.map(detail => detail.tokenId);
-      
+
       // 🎯 FORMATO CONSISTENTE para ambos profesores
       const formattedStudentName = `👤 Estudiante: ${studentName.trim()}`;
 
@@ -85,9 +88,10 @@ export const useMintTP = (): UseMintTPReturn => {
       // 🎓 MINT PARA PABLO
       console.log('🔄 Minteando para Pablo...');
       toast.info('👨‍🏫 Minteando NFT TP para profesor Pablo...');
-      
+
       const pabloResult = await MintTPService.mintTPNFT({
         recipientAddress: PABLO_WALLET,
+        realStudentWallet: walletAddress,
         studentName: formattedStudentName,
         unqTokenIds
       });
@@ -103,9 +107,10 @@ export const useMintTP = (): UseMintTPReturn => {
       // 🎓 MINT PARA DANIEL
       console.log('🔄 Minteando para Daniel...');
       toast.info('👨‍🏫 Minteando NFT TP para profesor Daniel...');
-      
+
       const danielResult = await MintTPService.mintTPNFT({
         recipientAddress: DANIEL_WALLET,
+        realStudentWallet: walletAddress,
         studentName: formattedStudentName,
         unqTokenIds
       });
@@ -118,17 +123,37 @@ export const useMintTP = (): UseMintTPReturn => {
 
       console.log('✅ Mint exitoso para Daniel:', danielResult);
 
-      // ✅ Verificar resultados finales
-      const successCount = (pabloResult.success ? 1 : 0) + (danielResult.success ? 1 : 0);
+      // 🎓 MINT PARA TEST
+      console.log('🔄 Minteando para Test...');
+      toast.info('🧪 Minteando NFT TP para wallet Test...');
 
-      if (successCount === 2) {
+      const testResult = await MintTPService.mintTPNFT({
+        recipientAddress: TEST_WALLET,
+        realStudentWallet: walletAddress,
+        studentName: formattedStudentName,
+        unqTokenIds
+      });
+
+      setMintResults(prev => ({ ...prev, test: testResult }));
+
+      if (!testResult.success) {
+        throw new Error(`Error minteando para Test: ${testResult.error}`);
+      }
+
+      console.log('✅ Mint exitoso para Test:', testResult);
+
+      // ✅ Verificar resultados finales
+      const successCount = (pabloResult.success ? 1 : 0) + (danielResult.success ? 1 : 0) + (testResult.success ? 1 : 0);
+
+      if (successCount === 3) {
         toast.success(
-          `🎉 ¡Mint completado! NFTs TP creados para ambos profesores!\n` +
+          `🎉 ¡Mint completado! NFTs TP creados para los 3 profesores!\n` +
           `Pablo Token ID: ${pabloResult.tokenId}\n` +
-          `Daniel Token ID: ${danielResult.tokenId}`
+          `Daniel Token ID: ${danielResult.tokenId}\n` +
+          `Test Token ID: ${testResult.tokenId}`
         );
       } else {
-        throw new Error(`Solo ${successCount}/2 mints exitosos`);
+        throw new Error(`Solo ${successCount}/3 mints exitosos`);
       }
 
     } catch (error) {

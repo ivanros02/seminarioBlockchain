@@ -11,7 +11,7 @@ export type { PromotionResult } from './promotionService';
 export const PROFESSOR_WALLETS = {
     PABLO: "0x96664195a728321F0F672B3BA29639eD727CE7a1",
     DANIEL: "0x81Bce31CaB4F37DdC8561550Ee7eaa859ca50581",
-    TEST: "0xa34Bb3b93C7DA0F87D65ed1FC67C4b402bEf9A351"
+    TEST: "0x05788623D682889fc8F4024718Be8ec2b0bCe77B"
 } as const;
 
 export interface ProfessorNFT {
@@ -35,10 +35,10 @@ export class ProfessorService {
      * 🔍 Verificar si una wallet es de profesor
      */
     static isProfessorWallet(walletAddress: string): boolean {
-      const address = walletAddress.toLowerCase();
-      return address === PROFESSOR_WALLETS.PABLO.toLowerCase() || 
-             address === PROFESSOR_WALLETS.DANIEL.toLowerCase() ||
-             address === PROFESSOR_WALLETS.TEST.toLowerCase();
+        const address = walletAddress.toLowerCase();
+        return address === PROFESSOR_WALLETS.PABLO.toLowerCase() ||
+            address === PROFESSOR_WALLETS.DANIEL.toLowerCase() ||
+            address === PROFESSOR_WALLETS.TEST.toLowerCase();
     }
 
     /**
@@ -63,6 +63,9 @@ export class ProfessorService {
 
             const provider = new ethers.BrowserProvider(window.ethereum);
             const contract = new ethers.Contract(TP_CONTRACT_ADDRESS, TP_CONTRACT_ABI, provider);
+
+            console.log('🔍 Verificando contrato TP:', TP_CONTRACT_ADDRESS);
+
 
             const totalSupply = await contract.totalSupply();
             const professorNFTs: ProfessorNFT[] = [];
@@ -124,7 +127,7 @@ export class ProfessorService {
         const professorName = this.getProfessorName(walletAddress);
         const nfts = await this.getProfessorTPNFTs(walletAddress);
         const hasTPNFT = nfts.length > 0;
-        
+
         // ✅ Verificar si puede promocionar usando el servicio de promoción
         const canPromoteFromContract = await PromotionService.canProfessorPromote(walletAddress);
         const canPromote = hasTPNFT && canPromoteFromContract;
@@ -143,7 +146,7 @@ export class ProfessorService {
      * 🎯 Promocionar estudiante - ACTUALIZADO con claimedTokenIds
      */
     static async promoteStudent(
-        professorWallet: string, 
+        professorWallet: string,
         studentWallet: string,
         studentName: string,
         promotionText: string,
@@ -188,7 +191,7 @@ export class ProfessorService {
         } catch (error) {
             console.error('❌ Error promocionando estudiante:', error);
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-            
+
             return {
                 success: false,
                 error: errorMessage
@@ -206,9 +209,9 @@ export class ProfessorService {
     }> {
         try {
             const professorData = await this.getProfessorData(walletAddress);
-            
+
             const totalTPCertificates = professorData.nfts.length;
-            
+
             let totalPromotions = 0;
             try {
                 // TODO: Implementar getProfessorPromotions en PromotionService
@@ -287,7 +290,7 @@ export class ProfessorService {
         } catch (error) {
             console.error('❌ Error en validación de promoción:', error);
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-            
+
             return {
                 success: false,
                 error: errorMessage
@@ -326,7 +329,7 @@ export class ProfessorService {
         if (!isNaN(numericGrade)) {
             return numericGrade % 1 === 0 ? numericGrade.toString() : numericGrade.toFixed(1);
         }
-        
+
         // Si no es numérico, devolver tal como está
         return grade.trim();
     }

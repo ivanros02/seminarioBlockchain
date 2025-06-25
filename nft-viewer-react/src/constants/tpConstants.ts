@@ -1,15 +1,8 @@
 // constants/tpConstants.ts
 
-// 🎯 Contrato NFT TP en Sepolia
-//original 0x3ae047900d3BB2E38F209eD59E970838d2EA479C
-//test 0xB80069e028AbC340F4670E7a412AC5d86A198ddf
-// test doble wallet 0x9C8F4F8FF29DB792Cd58FA16DeE22d38c0b5CAeE
-// PRODUCCIÓN: 0x283c30C8D7Bd81828C0EA911581022F79550fc04 poner este en contrato promocion
-export const TP_CONTRACT_ADDRESS = "0x283c30C8D7Bd81828C0EA911581022F79550fc04";
+export const TP_CONTRACT_ADDRESS = "0x4b4086AdD0737Ddd518CEd7899817C3488828124";
 
-// 🔑 ABI para contrato de PRODUCCIÓN (sin professorType)
 export const TP_CONTRACT_ABI = [
-  // Constructor y eventos
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -78,13 +71,16 @@ export const TP_CONTRACT_ABI = [
     "name": "AuthorizedWalletRemoved",
     "type": "event"
   },
-  
-  // Función principal de mint
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "realStudentWallet",
         "type": "address"
       },
       {
@@ -114,8 +110,6 @@ export const TP_CONTRACT_ABI = [
     "stateMutability": "nonpayable",
     "type": "function"
   },
-  
-  // Funciones de lectura
   {
     "inputs": [
       {
@@ -202,7 +196,7 @@ export const TP_CONTRACT_ABI = [
         "type": "bool"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -230,7 +224,7 @@ export const TP_CONTRACT_ABI = [
         "type": "string"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -289,8 +283,6 @@ export const TP_CONTRACT_ABI = [
     "stateMutability": "view",
     "type": "function"
   },
-  
-  // Funciones admin
   {
     "inputs": [
       {
@@ -443,9 +435,9 @@ export const TP_CONTRACT_ABI = [
   }
 ];
 
-// 🏷️ Tipos TypeScript
 export interface MintTPRequest {
   recipientAddress: string;
+  realStudentWallet: string;
   studentName: string;
   unqTokenIds: number[];
   customDate?: string;

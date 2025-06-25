@@ -1,7 +1,7 @@
 // services/promotionService.ts
 import { ethers } from 'ethers';
-
-export const PROMOTION_CONTRACT_ADDRESS = "0x722ED31f5278B2441e1Ca52b1dED30a0E68220f2";
+import { TP_CONTRACT_ADDRESS } from '../constants/tpConstants';
+export const PROMOTION_CONTRACT_ADDRESS = "0x5755C5c83B26256703fABC3e7F778CA08D112982";
 
 // ✅ ABI ACTUALIZADO para el contrato con validación de NFTs
 export const PROMOTION_CONTRACT_ABI = [
@@ -433,12 +433,11 @@ export class PromotionService {
 
       // 2. Verificar si tiene NFT TP (simulamos la lógica del contrato)
       // El contrato verifica tokens 1-5 en el contrato TP
-      const TP_CONTRACT = "0x283c30C8D7Bd81828C0EA911581022F79550fc04";
       
       for (let tokenId = 1; tokenId <= 5; tokenId++) {
         try {
           const balanceCall = await provider.call({
-            to: TP_CONTRACT,
+            to: TP_CONTRACT_ADDRESS,
             data: ethers.concat([
               "0x00fdd58e", // balanceOf(address,uint256) function selector
               ethers.AbiCoder.defaultAbiCoder().encode(["address", "uint256"], [professorWallet, tokenId])

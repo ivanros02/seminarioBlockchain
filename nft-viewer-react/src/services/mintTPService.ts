@@ -1,10 +1,10 @@
 // services/mintTPService.ts
 import { ethers } from 'ethers';
-import { 
-  TP_CONTRACT_ADDRESS, 
-  TP_CONTRACT_ABI, 
-  type MintTPRequest, 
-  type CertificateInfo 
+import {
+  TP_CONTRACT_ADDRESS,
+  TP_CONTRACT_ABI,
+  type MintTPRequest,
+  type CertificateInfo
 } from '../constants/tpConstants';
 
 export interface MintResult {
@@ -16,7 +16,7 @@ export interface MintResult {
 }
 
 export class MintTPService {
-  
+
   /**
    * 🎯 Función principal para mintear NFT TP
    */
@@ -32,7 +32,7 @@ export class MintTPService {
       // ✅ Conectar con el proveedor
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      
+
       // ✅ Verificar que estamos en Sepolia
       const network = await provider.getNetwork();
       if (network.chainId !== 11155111n) {
@@ -54,6 +54,7 @@ export class MintTPService {
       // ✅ Preparar parámetros para el contrato
       const mintParams = [
         request.recipientAddress,
+        request.realStudentWallet,
         request.studentName,
         currentDate,
         request.unqTokenIds
@@ -105,9 +106,9 @@ export class MintTPService {
 
     } catch (error) {
       console.error('❌ Error en mint TP:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      
+
       return {
         success: false,
         error: errorMessage
@@ -119,20 +120,20 @@ export class MintTPService {
    * 🔍 Extraer token ID del receipt de la transacción
    */
   private static async extractTokenIdFromReceipt(
-    receipt: any, 
+    receipt: any,
     contract: ethers.Contract
   ): Promise<number | undefined> {
     try {
       // Buscar evento CertificateMinted en los logs
       const logs = receipt.logs || [];
-      
+
       for (const log of logs) {
         try {
           const parsedLog = contract.interface.parseLog({
             topics: log.topics,
             data: log.data
           });
-          
+
           if (parsedLog && parsedLog.name === 'CertificateMinted') {
             const tokenId = Number(parsedLog.args.tokenId);
             console.log('🎯 Token ID extraído del evento:', tokenId);
@@ -143,10 +144,10 @@ export class MintTPService {
           continue;
         }
       }
-      
+
       console.log('⚠️ No se pudo extraer token ID del evento');
       return undefined;
-      
+
     } catch (error) {
       console.error('❌ Error extrayendo token ID:', error);
       return undefined;
@@ -185,7 +186,7 @@ export class MintTPService {
       const contract = new ethers.Contract(TP_CONTRACT_ADDRESS, TP_CONTRACT_ABI, provider);
 
       const certificate = await contract.getCertificate(tokenId);
-      
+
       return {
         tokenId,
         studentName: certificate.studentName,
@@ -232,10 +233,10 @@ export class MintTPService {
       }
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      
+
       // Obtener receipt de la transacción
       const receipt = await provider.getTransactionReceipt(txHash);
-      
+
       if (!receipt) {
         throw new Error('Transacción no encontrada');
       }
@@ -250,10 +251,10 @@ export class MintTPService {
             topics: log.topics,
             data: log.data
           });
-          
+
           if (parsedLog && parsedLog.name === 'CertificateMinted') {
             const tokenId = Number(parsedLog.args.tokenId);
-            
+
             // Obtener datos completos del certificado
             return await this.getCertificateByTokenId(tokenId);
           }
